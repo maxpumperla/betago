@@ -63,4 +63,7 @@ omegago/dataloader/data/*
 # KGS index
 kgs_index.html
 
+# Hide test samples script
+omegago/dataloader/test_samples.py
+
 *.ipynb_checkpoints
