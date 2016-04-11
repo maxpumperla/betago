@@ -60,4 +60,7 @@ target/
 omegago/data/*
 omegago/dataloader/data/*
 
+# KGS index
+kgs_index.html
+
 *.ipynb_checkpoints
