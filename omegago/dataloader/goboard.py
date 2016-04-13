@@ -38,6 +38,9 @@ class GoBoard(object):
         if pos not in self.board:
             go_string.insert_liberty(pos)
 
+    def is_move_on_board(self, move):
+        return move in self.board
+
     def create_go_string(self, color, pos):
         ''' Create GoString from current Board and move '''
         go_string = GoString(self.board_size, color)
