@@ -57,14 +57,14 @@ docs/_build/
 target/
 
 # Ignore data folders
-omegago/data/*
-omegago/dataloader/data/*
+betago/data/*
+betago/dataloader/data/*
 
 # KGS index
 kgs_index.html
 
 # Hide test samples script
-omegago/dataloader/test_samples.py
-omegago/test_samples.py
+betago/dataloader/test_samples.py
+betago/test_samples.py
 
 *.ipynb_checkpoints
