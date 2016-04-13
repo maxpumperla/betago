@@ -10,10 +10,9 @@
 </head>
 <body>
 
-<h1> OmegaGo Board </h1>
+<h1> BetaGo Board </h1>
 <div id="board"></div>
-<div><p>Click on board to play. See page source for implementation, and
-  <a href="http://jgoboard.com">http://jgoboard.com</a> for details.</p></div>
+<div><p>Click to play.</p></div>
 
 <script type="text/javascript" src="dist/jgoboard-latest.js"></script>
 <script type="text/javascript" src="large/board.js"></script>
@@ -24,12 +23,30 @@ var player = JGO.WHITE; // next player
 var ko = false, lastMove = false; // ko coordinate and last move coordinate
 var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
 
-jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 2), JGO.BLACK);
+// Man, do I want to use superagent here. Repeat: add. no. dependencies.
+function postMove(url, data, success) {
+    var xmlhttp;
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", url, false);
+    // Note that we force a synchronous call here, bad karma.
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState>3 && xmlhttp.status==200) {
+          success(xmlhttp.responseText);
+      }
+    };
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify(data));
+    return xmlhttp;
+}
+
+
+jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 0), JGO.BLACK);
 
 jsetup.setOptions({stars: {points:5}});
 jsetup.create('board', function(canvas) {
+
   canvas.addListener('click', function(coord, ev) {
-    //var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
+    var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
 
     if(ev.shiftKey) { // on shift do edit
       if(jboard.getMark(coord) == JGO.MARK.NONE)
@@ -43,12 +60,9 @@ jsetup.create('board', function(canvas) {
     // in any case so no need to worry about putting it back afterwards
     if(lastHover)
       jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
-
     lastHover = false;
 
     var play = jboard.playMove(coord, player, ko);
-    console.log(coord )
-
     if(play.success) {
       jboard.setType(coord, player); // play stone
       jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
@@ -65,19 +79,22 @@ jsetup.create('board', function(canvas) {
         jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = play.ko;
 
-      console.log(player)
       player = JGO.BLACK;
-      console.log("played white move")
-  } else alert('Illegal move A: ' + play.errorMsg);
+    } else alert('Illegal move A: ' + play.errorMsg);
 
-    console.log(player)
-    coord.i = coord.i+1
-    console.log(coord)
-    play = jboard.playMove(coord, player, ko);
 
-    if(play.success) {
+    var botcoord;
+    postMove('http://localhost:5000/prediction', coord,
+      function(data) {botcoord = JSON.parse(data)
+      });
+    coord.i = botcoord.i
+    coord.j = botcoord.j
+
+    playNext = jboard.playMove(coord, player, ko);
+
+    if(playNext.success) {
       jboard.setType(coord, player); // play stone
-      jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
+      jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
 
       if(lastMove)
         jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
@@ -87,9 +104,9 @@ jsetup.create('board', function(canvas) {
       jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
       lastMove = coord;
 
-      if(play.ko)
-        jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
-      ko = play.ko;
+      if(playNext.ko)
+        jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
+      ko = playNext.ko;
 
       console.log(player)
       player = JGO.WHITE;
