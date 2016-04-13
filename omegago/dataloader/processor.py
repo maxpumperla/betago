@@ -4,8 +4,9 @@ from base_processor import GoDataProcessor, GoFileProcessor
 
 class SevenPlaneProcessor(GoDataProcessor):
 
-    def __init__(self, data_directory='data',  num_planes=7):
-        super(SevenPlaneProcessor, self).__init__(data_directory=data_directory)
+    def __init__(self, data_directory='data',  num_planes=7, consolidate=True):
+        super(SevenPlaneProcessor, self).__init__(data_directory=data_directory,
+                                                  num_planes=num_planes, consolidate=consolidate)
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''
@@ -52,8 +53,9 @@ class SevenPlaneProcessor(GoDataProcessor):
 
 class ThreePlaneProcessor(GoDataProcessor):
 
-    def __init__(self, data_directory='data', num_planes=3):
-        super(ThreePlaneProcessor, self).__init__(data_directory=data_directory, num_planes=num_planes)
+    def __init__(self, data_directory='data', num_planes=3, consolidate=True):
+        super(ThreePlaneProcessor, self).__init__(data_directory=data_directory,
+                                                  num_planes=num_planes, consolidate=consolidate)
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''
@@ -85,8 +87,9 @@ class ThreePlaneProcessor(GoDataProcessor):
 
 
 class SevenPlaneFileProcessor(GoFileProcessor):
-    def __init__(self, data_directory='data', num_planes=7):
-        super(SevenPlaneFileProcessor, self).__init__(data_directory=data_directory, num_planes=num_planes)
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True):
+        super(SevenPlaneFileProcessor, self).__init__(data_directory=data_directory,
+                                                      num_planes=num_planes, consolidate=consolidate)
 
     def store_results(self, data_file, color, move, go_board):
         '''
@@ -147,5 +150,5 @@ class SevenPlaneFileProcessor(GoFileProcessor):
 
 
 if __name__ == '__main__':
-    processor = SevenPlaneFileProcessor()
+    processor = SevenPlaneProcessor(consolidate=False)
     processor.load_go_data()
