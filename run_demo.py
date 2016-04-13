@@ -9,8 +9,8 @@ from betago.dataloader.processor import SevenPlaneProcessor
 
 processor = SevenPlaneProcessor()
 
-model_file = 'models/idiot_bot.yml'
-weight_file = 'models/idiot_weights.hd5'
+model_file = 'model_zoo/idiot_bot.yml'
+weight_file = 'model_zoo/idiot_weights.hd5'
 
 with open(model_file, 'r') as f:
     yml = yaml.load(f)
