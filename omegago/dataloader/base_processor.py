@@ -22,9 +22,10 @@ def worker(jobinfo):
 
 class GoBaseProcessor(object):
 
-    def __init__(self, data_directory='data', num_planes=7):
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True):
         self.data_dir = data_directory
         self.num_planes = num_planes
+        self.consolidate = consolidate
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
         return NotImplemented
@@ -32,13 +33,39 @@ class GoBaseProcessor(object):
     def consolidate_games(self, name, samples):
         return NotImplemented
 
-    def load_go_data(self):
+    def load_go_data(self, types=['train'], data_dir='data', num_samples=1000):
+        # Load and initialize an index from KGS and download zipped files
+        index = KGSIndex(data_directory=self.data_dir)
+        index.download_files()
+
+        # Depending on type, unzip and process data, then store it in one consolidated file.
+        for name in types:
+            sampler = Sampler(data_dir=self.data_dir)
+            if name == 'test':
+                samples = sampler.test_games
+            elif name == 'train' and num_samples is not None:
+                samples = sampler.draw_training_samples(num_samples)
+            elif name == 'train' and num_samples is None:
+                samples = sampler.draw_all_training()
+
+            # Map load to CPUs, then consolidate all examples
+            self.map_to_workers(name, samples)
+
+            # If consolidate flag is True, consolidate. Note that merging all data into, e.g.
+            # one numpy array will be too expensive at some point.
+            if self.consolidate:
+                X, y = self.consolidate_games(name, samples)
+            else:
+                print('>>> No consolidation done, single files stored in data folder')
+        print('>>> Finished processing')
+        return X, y
+
+    def load_go_data_cli(self):
         '''
         Main method for loading Go game data.
         Data types to choose from are:
             test: Load test data. This set is fixed and not contained in any train data.
-            train10k: Load train data for 10000 games
-            trainall: Load train data for all available games
+            train: Load train data for specified number of games
         '''
         # Parse command line arguments
         parser = argparse.ArgumentParser(description='Process Go Game data')
@@ -65,24 +92,7 @@ class GoBaseProcessor(object):
             os.makedirs(target_dir)
         self.data_dir = target_dir
 
-        # Load and initialize an index from KGS and download zipped files
-        index = KGSIndex(data_directory=target_dir)
-        index.download_files()
-
-        # Depending on type, unzip and process data, then store it in one consolidated file.
-        for name in types:
-            sampler = Sampler(data_dir=target_dir)
-            if name == 'test':
-                samples = sampler.test_games
-            elif name == 'train' and num_samples is not None:
-                samples = sampler.draw_training_samples(num_samples)
-            elif name == 'train' and num_samples is None:
-                samples = sampler.draw_all_training()
-
-            # Map load to CPUs, then consolidate all examples
-            self.map_to_workers(name, samples)
-            self.consolidate_games(name, samples)
-        print('>>> Finished processing')
+        self.load_go_data(types=types, data_dir=self.data_dir, num_samples=num_samples)
 
     def get_handicap(self, go_board, sgf):
         first_move_done = False
@@ -158,8 +168,9 @@ class GoBaseProcessor(object):
 
 class GoDataProcessor(GoBaseProcessor):
 
-    def __init__(self, data_directory='data', num_planes=7):
-        super(GoDataProcessor, self).__init__(data_directory=data_directory, num_planes=num_planes)
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True):
+        super(GoDataProcessor, self).__init__(data_directory=data_directory,
+                                              num_planes=num_planes, consolidate=consolidate)
 
     def feature_and_label(self, color, move, go_board):
         return NotImplemented
@@ -208,8 +219,6 @@ class GoDataProcessor(GoBaseProcessor):
 
     def consolidate_games(self, name, samples):
         print('>>> Creating consolidated numpy arrays')
-        features = None
-        labels = None
 
         files_needed = set(file_name for file_name, index in samples)
         print('>>> Total number of files: ' + str(len(files_needed)))
@@ -219,15 +228,17 @@ class GoDataProcessor(GoBaseProcessor):
             file_name = zip_file_name.replace('.zip', '') + name
             file_names.append(file_name)
 
+        feature_list = []
+        label_list = []
         for file_name in file_names:
             X = np.load(self.data_dir + '/' + file_name + '_features.npy')
             y = np.load(self.data_dir + '/' + file_name + '_labels.npy')
-            if features is None:
-                features = X
-                labels = y
-            else:
-                features = np.concatenate((features, X), axis=0)
-                labels = np.concatenate((labels, y), axis=0)
+            feature_list.append(X)
+            label_list.append(y)
+            print('>>> Done')
+
+        features = np.concatenate(feature_list, axis=0)
+        labels = np.concatenate(label_list, axis=0)
 
         feature_file = self.data_dir + '/' + str(self.num_planes) + '_plane_features_' + name
         label_file = self.data_dir + '/' + str(self.num_planes) + '_plane_labels_' + name
@@ -240,8 +251,9 @@ class GoDataProcessor(GoBaseProcessor):
 
 class GoFileProcessor(GoBaseProcessor):
 
-    def __init__(self, data_directory='data', num_planes=7):
-        super(GoFileProcessor, self).__init__(data_directory=data_directory, num_planes=num_planes)
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True):
+        super(GoFileProcessor, self).__init__(data_directory=data_directory,
+                                              num_planes=num_planes, consolidate=consolidate)
 
     def store_results(self, data_file, color, move, go_board):
         return NotImplemented
