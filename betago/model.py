@@ -2,7 +2,7 @@ from multiprocessing import Process
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS, cross_origin
 import numpy as np
-from dataloader.goboard import GoBoard
+from .dataloader.goboard import GoBoard
 
 
 class GoModel(object):

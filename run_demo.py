@@ -4,8 +4,8 @@ import os
 import webbrowser
 
 from keras.models import model_from_yaml
-from omegago.model import KerasBot
-from omegago.dataloader.processor import SevenPlaneProcessor
+from betago.model import KerasBot
+from betago.dataloader.processor import SevenPlaneProcessor
 
 processor = SevenPlaneProcessor()
 
