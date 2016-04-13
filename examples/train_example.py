@@ -3,8 +3,6 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
-from keras.models import model_from_yaml
-import yaml
 
 from omegago.dataloader.processor import SevenPlaneProcessor
 
@@ -54,25 +52,10 @@ model.compile(loss='categorical_crossentropy', optimizer='adadelta')
 model.fit(X, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
           show_accuracy=True, verbose=1)
 
-model_file = '../model_zoo/model.yml'
 weight_file = '../model_zoo/weights.hd5'
-
 model.save_weights(weight_file, overwrite=True)
 
-
+model_file = '../model_zoo/model.yml'
 with open(model_file, 'w') as yml:
     model_yaml = model.to_yaml()
     yml.write(model_yaml)
-    model_from_yaml(model_yaml)
-
-with open(model_file, 'r') as f:
-    yml = yaml.load(f)
-    yml = yaml.dump(yml)
-    print(yml)
-    re_model = model_from_yaml(yml)
-
-re_model.load_weights(weight_file)
-
-# TODO: Serialize model and weights, store them in models subfolder
-# TODO: Create a go_model flask app from a model and a preprocessor
-# TODO: Serve the model and connect to UI
