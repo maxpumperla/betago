@@ -59,6 +59,7 @@ target/
 # Ignore data folders
 betago/data/*
 betago/dataloader/data/*
+examples/data/*
 
 # KGS index
 kgs_index.html
