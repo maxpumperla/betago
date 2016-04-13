@@ -36,11 +36,12 @@ class GoModel(object):
 
         @app.route('/')
         def home():
-            return 'BetaGo'
+            return 'betago'
 
         @app.route('/prediction', methods=['GET', 'POST'])
         @cross_origin()
         def next_move():
+            ''' predict next move and send to client '''
             val = self.predict()
             print(val)
             return val
@@ -50,8 +51,9 @@ class GoModel(object):
 
 class KerasBot(GoModel):
 
-    def __init__(self, model, processor):
+    def __init__(self, model, processor, top_n=10):
         super(KerasBot, self).__init__(model=model, processor=processor)
+        self.top_n = top_n
 
     def predict(self):
         content = request.json
@@ -60,8 +62,7 @@ class KerasBot(GoModel):
         row = content['i']
         col = content['j']
         color = 'w'
-
-        move = (row, col)  # this serves as label, but it's irrelevant here
+        move = (row, col)
         self.go_board.apply_move(color, move)
 
         # Preprocess move, make prediction
@@ -73,11 +74,11 @@ class KerasBot(GoModel):
         found_move = False
         top_n = 10
 
-        pred = self.model.predict(X)
+        pred = np.squeeze(self.model.predict(X))
         top_n_pred_idx = pred.argsort()[-top_n:][::-1]
         for idx in top_n_pred_idx:
             if not found_move:
-                prediction = int(pred[idx])
+                prediction = int(idx)
                 pred_row = prediction // 19
                 pred_col = prediction % 19
                 pred_move = (pred_row, pred_col)
