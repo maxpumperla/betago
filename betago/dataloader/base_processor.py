@@ -2,14 +2,15 @@ from __future__ import print_function
 import os
 import os.path
 import zipfile
-import goboard
+import numpy as np
 import argparse
 import multiprocessing
 from os import sys
 from gomill import sgf as gosgf
-from index_processor import KGSIndex
-from train_test_split import Sampler
-import numpy as np
+
+from .index_processor import KGSIndex
+from .train_test_split import Sampler
+from .goboard import GoBoard
 
 
 def worker(jobinfo):
@@ -21,24 +22,57 @@ def worker(jobinfo):
 
 
 class GoBaseProcessor(object):
+    '''
+    Abstract base class for Go data processing. To implement this class, implement
+    process_zip and consolidate_games below.
+
+    Generally speaking, processing load is split between available CPUs, thereby generating intermediate
+    files for each worker. Processing many files can produce massive amounts of data that will not (easily)
+    fit into memory. To avoid overflow, deactivate file consolidation by initializing with consolidate=False.
+    '''
 
     def __init__(self, data_directory='data', num_planes=7, consolidate=True):
+        '''
+        Parameters:
+        -----------
+        data_dir: relative path to store data files, defaults to 'data'
+        num_planes: Number of Go board copies used as input, corresponds to the number of input channels
+                    in a CNN.
+        consolidate: Boolean flag to indicate if intermediate results should be consolidated into one, which
+                     can be very expensive.
+        '''
         self.data_dir = data_directory
         self.num_planes = num_planes
         self.consolidate = consolidate
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
+        '''
+        Method to determine how to process each zip file with games.
+        '''
         return NotImplemented
 
     def consolidate_games(self, name, samples):
+        '''
+        Consolidate a list of results into one.
+        '''
         return NotImplemented
 
     def load_go_data(self, types=['train'], data_dir='data', num_samples=1000):
-        # Load and initialize an index from KGS and download zipped files
+        '''
+        Main method to load go data.
+
+        Loads and initializes an index from KGS and downloads zipped files. Depending on provided type, unzip and
+        process data, then optionally store it in one consolidated file.
+
+        Parameters:
+        -----------
+        types: Provide a list, subset of ['train', 'test'].
+        data_dir: local folder to store data, provided as relative path.
+        num_samples: Number of Go games to load.
+        '''
         index = KGSIndex(data_directory=self.data_dir)
         index.download_files()
 
-        # Depending on type, unzip and process data, then store it in one consolidated file.
         for name in types:
             sampler = Sampler(data_dir=self.data_dir)
             if name == 'test':
@@ -58,11 +92,14 @@ class GoBaseProcessor(object):
             else:
                 print('>>> No consolidation done, single files stored in data folder')
         print('>>> Finished processing')
-        return X, y
+        if self.consolidate:
+            return X, y
+        else:
+            return
 
     def load_go_data_cli(self):
         '''
-        Main method for loading Go game data.
+        Main method for loading Go game data from command line.
         Data types to choose from are:
             test: Load test data. This set is fixed and not contained in any train data.
             train: Load train data for specified number of games
@@ -95,6 +132,7 @@ class GoBaseProcessor(object):
         self.load_go_data(types=types, data_dir=self.data_dir, num_samples=num_samples)
 
     def get_handicap(self, go_board, sgf):
+        ''' Get handicap stones '''
         first_move_done = False
         if sgf.get_handicap() != None and sgf.get_handicap() != 0:
             for setup in sgf.get_root().get_setup_stones():
@@ -141,10 +179,12 @@ class GoBaseProcessor(object):
             sys.exit(-1)
 
     def init_go_board(self, sgf_contents):
+        ''' Initialize a 19x19 go board from SGF file content'''
         sgf = gosgf.Sgf_game.from_string(sgf_contents)
-        return sgf, goboard.GoBoard(19)
+        return sgf, GoBoard(19)
 
     def num_total_examples(self, this_zip, game_list, name_list):
+        ''' Total number of moves, i.e. training samples'''
         total_examples = 0
         for index in game_list:
             name = name_list[index + 1]
@@ -167,12 +207,20 @@ class GoBaseProcessor(object):
 
 
 class GoDataProcessor(GoBaseProcessor):
-
+    '''
+    GoDataProcessor generates data, e.g. numpy arrays, of features and labels and returns them to the user.
+    '''
     def __init__(self, data_directory='data', num_planes=7, consolidate=True):
         super(GoDataProcessor, self).__init__(data_directory=data_directory,
                                               num_planes=num_planes, consolidate=consolidate)
 
     def feature_and_label(self, color, move, go_board):
+        '''
+        Given a go board and the next move for a given color, treat the next move as label and
+        process the current board situation as feature to learn this label.
+
+        return: X, y - feature and label
+        '''
         return NotImplemented
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
@@ -250,12 +298,17 @@ class GoDataProcessor(GoBaseProcessor):
 
 
 class GoFileProcessor(GoBaseProcessor):
-
+    '''
+    GoFileProcessor generates files, e.g. binary representations, of features and labels.
+    '''
     def __init__(self, data_directory='data', num_planes=7, consolidate=True):
         super(GoFileProcessor, self).__init__(data_directory=data_directory,
                                               num_planes=num_planes, consolidate=consolidate)
 
     def store_results(self, data_file, color, move, go_board):
+        '''
+        Apply current move of given color to provided board and store to data_file.
+        '''
         return NotImplemented
 
     def write_file_header(self, data_file, n, num_planes, board_size, bits_per_pixel):

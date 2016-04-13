@@ -1,8 +1,15 @@
 import numpy as np
-from base_processor import GoDataProcessor, GoFileProcessor
+from .base_processor import GoDataProcessor, GoFileProcessor
 
 
 class SevenPlaneProcessor(GoDataProcessor):
+    '''
+    Implementation of a Go data processor, using seven planes of 19x19 values to represent the position of
+    a go board, as explained below.
+
+    This closely reflects the representation suggested in Clark, Storkey:
+    http://arxiv.org/abs/1412.3409
+    '''
 
     def __init__(self, data_directory='data',  num_planes=7, consolidate=True):
         super(SevenPlaneProcessor, self).__init__(data_directory=data_directory,
@@ -52,6 +59,10 @@ class SevenPlaneProcessor(GoDataProcessor):
 
 
 class ThreePlaneProcessor(GoDataProcessor):
+    '''
+    Simpler version of the above processor using just three planes. This data processor uses one plane for
+    stone positions of each color and one for ko.
+    '''
 
     def __init__(self, data_directory='data', num_planes=3, consolidate=True):
         super(ThreePlaneProcessor, self).__init__(data_directory=data_directory,
@@ -87,6 +98,10 @@ class ThreePlaneProcessor(GoDataProcessor):
 
 
 class SevenPlaneFileProcessor(GoFileProcessor):
+    '''
+    File processor corresponding to the above data processor. Loading all available data into memory is simply
+    not feasible, and this class allows preprocessing into an efficient, binary format.
+    '''
     def __init__(self, data_directory='data', num_planes=7, consolidate=True):
         super(SevenPlaneFileProcessor, self).__init__(data_directory=data_directory,
                                                       num_planes=num_planes, consolidate=consolidate)
@@ -147,8 +162,3 @@ class SevenPlaneFileProcessor(GoFileProcessor):
                         thisbyte = 0
         if thisbitpos != 0:
             data_file.write(chr(thisbyte))
-
-
-if __name__ == '__main__':
-    processor = SevenPlaneProcessor(consolidate=False)
-    processor.load_go_data()

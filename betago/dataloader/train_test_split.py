@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os
 import random
-from index_processor import KGSIndex
+from .index_processor import KGSIndex
 
 
 class Sampler(object):
