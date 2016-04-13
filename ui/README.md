@@ -1,5 +1,5 @@
-jGoBoard
-========
+This is a fork of jGoBoard:
+==========================
 
 JavaScript-based library for rendering goban (go board).
 
