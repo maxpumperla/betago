@@ -1,3 +1,6 @@
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v. 2.0. If a copy of the MPL was not distributed with this file, You can
+# obtain one at http://mozilla.org/MPL/2.0/.
 from __future__ import print_function
 import os
 import os.path
@@ -9,7 +12,7 @@ from os import sys
 from gomill import sgf as gosgf
 
 from .index_processor import KGSIndex
-from .train_test_split import Sampler
+from .sampling import Sampler
 from .goboard import GoBoard
 
 
