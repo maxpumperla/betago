@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask.ext.cors import CORS, cross_origin
 import numpy as np
 from .dataloader.goboard import GoBoard
+from .processor import ThreePlaneProcessor
 
 
 class GoModel(object):
@@ -22,8 +23,7 @@ class GoModel(object):
         self.model = model
         self.processor = processor
         self.go_board = GoBoard(19)
-
-        self.start_service()
+        self.num_planes = processor.num_planes
 
     def predict(self):
         ''' Predict the next move '''
@@ -39,7 +39,7 @@ class GoModel(object):
         self.server.terminate()
         self.server.join()
 
-    def start_service(self):
+    def run(self):
         ''' Run flask app'''
         app = Flask(__name__)
         CORS(app, resources={r"/prediction/*": {"origins": "*"}})
@@ -71,7 +71,6 @@ class KerasBot(GoModel):
     def __init__(self, model, processor, top_n=10):
         super(KerasBot, self).__init__(model=model, processor=processor)
         self.top_n = top_n
-        self.num_planes = processor.num_planes
 
     def predict(self):
         content = request.json
@@ -124,7 +123,7 @@ class IdiotBot(GoModel):
     '''
     Play random moves, like a good 30k bot.
     '''
-    def __init__(self, model=None, processor=None):
+    def __init__(self, model=None, processor=ThreePlaneProcessor()):
         super(IdiotBot, self).__init__(model=model, processor=processor)
 
     def predict(self):
