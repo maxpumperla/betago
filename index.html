@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Betago : Go bots for the people">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Betago</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/maxpumperla/betago">View on GitHub</a>
+
+          <h1 id="project_title">Betago</h1>
+          <h2 id="project_tagline">Go bots for the people</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/maxpumperla/betago/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/maxpumperla/betago/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="betago" class="anchor" href="#betago" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>BetaGo</h1>
+
+<p><em>So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!</em></p>
+
+<p><img src="betago.gif" alt="betago-demo"></p>
+
+<p>BetaGo lets you roll your own Go engine. It downloads Go games for you, preprocesses them, trains a model on data, e.g. a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your own Go bot.</p>
+
+<h2>
+<a id="its-alive" class="anchor" href="#its-alive" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>It's alive</h2>
+
+<p>Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a reasonable moves, but is still very weak.</p>
+
+<div class="highlight highlight-source-python"><pre>pip install betago
+git clone https:<span class="pl-k">//</span>github.com<span class="pl-k">/</span>maxpumperla<span class="pl-k">/</span>betago
+cd betago
+python run_demo.py</pre></div>
+
+<h2>
+<a id="contribute" class="anchor" href="#contribute" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contribute</h2>
+
+<p>You can modify and extend any of the steps outlined above and help decrease the gap between AlphaGo and BetaGo, tear down walls and disrupt the establishment. Consider contributing by:</p>
+
+<ul>
+<li>Adding new models to the model zoo.</li>
+<li>Writing new Go data processing functionality.</li>
+<li>Adding more complex models and bots.</li>
+</ul>
+
+<h2>
+<a id="how-can-i-run-my-own-bot" class="anchor" href="#how-can-i-run-my-own-bot" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How can I run my own bot?</h2>
+
+<p>Training and serving a bot can be done in just a few steps. The following example uses a convolutional neural network implemented in keras, but you are free to choose other libraries as well. The code for this example can be found in the examples folder.
+We start by defining a Go data processor, which downloads an preprocesses Go games. A regular Go board consists of 19 times 19 fields. The <code>SevenPlaneProcessor</code>, inspired by [1] loads seven planes of <code>19*19</code> data points, three layers representing moves of varying liberties for each color and one capturing for ko.</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> betago.dataloader.processor <span class="pl-k">import</span> SevenPlaneProcessor
+processor <span class="pl-k">=</span> SevenPlaneProcessor()
+input_channels <span class="pl-k">=</span> processor.num_planes
+
+<span class="pl-c"># Load go data and one-hot encode labels</span>
+<span class="pl-c1">X</span>, y <span class="pl-k">=</span> processor.load_go_data(<span class="pl-v">num_samples</span><span class="pl-k">=</span><span class="pl-c1">1000</span>)
+<span class="pl-c1">X</span> <span class="pl-k">=</span> <span class="pl-c1">X</span>.astype(<span class="pl-s"><span class="pl-pds">'</span>float32<span class="pl-pds">'</span></span>)
+<span class="pl-c1">Y</span> <span class="pl-k">=</span> np_utils.to_categorical(y, nb_classes)</pre></div>
+
+<p>Next, we train a neural network to predict moves. If you insist, you may call it a policy network. This example is just one of many possible architectures to tackle this problem and by no means optimal. Feel free to add or adapt layers and come up with your own experiments. We use the new Keras 1.0 here, but you could use older versions as well.</p>
+
+<div class="highlight highlight-source-python"><pre>batch_size <span class="pl-k">=</span> <span class="pl-c1">128</span>
+nb_epoch <span class="pl-k">=</span> <span class="pl-c1">20</span>
+
+nb_classes <span class="pl-k">=</span> <span class="pl-c1">19</span> <span class="pl-k">*</span> <span class="pl-c1">19</span>  <span class="pl-c"># One class for each position on the board</span>
+go_board_rows, go_board_cols <span class="pl-k">=</span> <span class="pl-c1">19</span>, <span class="pl-c1">19</span>  <span class="pl-c"># input dimensions of go board</span>
+nb_filters <span class="pl-k">=</span> <span class="pl-c1">32</span>  <span class="pl-c"># number of convolutional filters to use</span>
+nb_pool <span class="pl-k">=</span> <span class="pl-c1">2</span>  <span class="pl-c"># size of pooling area for max pooling</span>
+nb_conv <span class="pl-k">=</span> <span class="pl-c1">3</span>  <span class="pl-c"># convolution kernel size</span>
+
+<span class="pl-c"># Specify a keras model with two convolutional layers and two dense layers,</span>
+<span class="pl-c"># connecting the (num_samples, 7, 19, 19) input to the 19*19 output vector.</span>
+model <span class="pl-k">=</span> Sequential()
+model.add(Convolution2D(nb_filters, nb_conv, nb_conv, <span class="pl-v">border_mode</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>valid<span class="pl-pds">'</span></span>,
+                        <span class="pl-v">input_shape</span><span class="pl-k">=</span>(input_channels, go_board_rows, go_board_cols)))
+model.add(Activation(<span class="pl-s"><span class="pl-pds">'</span>relu<span class="pl-pds">'</span></span>))
+model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
+model.add(Activation(<span class="pl-s"><span class="pl-pds">'</span>relu<span class="pl-pds">'</span></span>))
+model.add(MaxPooling2D(<span class="pl-v">pool_size</span><span class="pl-k">=</span>(nb_pool, nb_pool)))
+model.add(Dropout(<span class="pl-c1">0.2</span>))
+model.add(Flatten())
+model.add(Dense(<span class="pl-c1">256</span>))
+model.add(Activation(<span class="pl-s"><span class="pl-pds">'</span>relu<span class="pl-pds">'</span></span>))
+model.add(Dropout(<span class="pl-c1">0.5</span>))
+model.add(Dense(nb_classes))
+model.add(Activation(<span class="pl-s"><span class="pl-pds">'</span>softmax<span class="pl-pds">'</span></span>))
+model.compile(<span class="pl-v">loss</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>categorical_crossentropy<span class="pl-pds">'</span></span>,
+              <span class="pl-v">optimizer</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>adadelta<span class="pl-pds">'</span></span>,
+              <span class="pl-v">metrics</span><span class="pl-k">=</span>[<span class="pl-s"><span class="pl-pds">'</span>accuracy<span class="pl-pds">'</span></span>])
+
+<span class="pl-c"># Fit the model to data</span>
+model.fit(<span class="pl-c1">X</span>, <span class="pl-c1">Y</span>, <span class="pl-v">batch_size</span><span class="pl-k">=</span>batch_size, <span class="pl-v">nb_epoch</span><span class="pl-k">=</span>nb_epoch, <span class="pl-v">verbose</span><span class="pl-k">=</span><span class="pl-c1">1</span>)</pre></div>
+
+<p>With <code>processor</code> and <code>model</code> we can initialize a so called <code>KerasBot</code>, which will serve the model for us.</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-k">import</span> os
+<span class="pl-k">import</span> webbrowser
+<span class="pl-c"># Open web frontend, assuming you cd'ed into betago</span>
+webbrowser.open(<span class="pl-s"><span class="pl-pds">'</span>file://<span class="pl-pds">'</span></span> <span class="pl-k">+</span> os.getcwd() <span class="pl-k">+</span> <span class="pl-s"><span class="pl-pds">'</span>/ui/demoBot.html<span class="pl-pds">'</span></span>, <span class="pl-v">new</span><span class="pl-k">=</span><span class="pl-c1">2</span>)
+
+<span class="pl-c"># Create a bot from processor and model, then run it.</span>
+<span class="pl-k">from</span> betago.model <span class="pl-k">import</span> KerasBot
+go_model <span class="pl-k">=</span> KerasBot(<span class="pl-v">model</span><span class="pl-k">=</span>model, <span class="pl-v">processor</span><span class="pl-k">=</span>processor)
+go_model.run()</pre></div>
+
+<h2>
+<a id="tell-me-how-it-works" class="anchor" href="#tell-me-how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tell me how it works</h2>
+
+<p>Alright, alright. BetaGo consists of a just few components, all of which you have already seen. First, to load and process data into memory, we use a <code>GoDataProcessor</code>. BetaGo comes with two such processors out of the box, namely <code>SevenPlaneProcessor</code> and the simpler <code>ThreePlaneProcessor</code> but it's relatively straight forward to add new ones. The processor loads an index of zip files containing .sgf files with Go games and prepares them for further usage. There's a lot of Go games on KGS, so if you are not careful and try to load too many files this way, your application may crash. This is where <code>GoFileProcessor</code> comes in, which stores data in a lean, binary format to be picked up later on. The work on processors originated from <a href="https://github.com/hughperkins" class="user-mention">@hughperkins</a> kgsgo-dataset-preprocessor project, which deserves a lot of credit.</p>
+
+<p>Next, to actually predict moves on data processed by any of the above processors, we provide a default implementation of a <code>GoModel</code>, called <code>KerasBot</code>, which trains a deep network of your choice and exposes it to a Flask REST API, whereas <code>IdiotBot</code> simply makes random moves. <code>KerasBot</code> will try to place the best move, but will take inferior moves if predicted values turn out to be illegal moves. Notably, it is very handy to use keras here, but creating a new <code>GoModel</code> from scratch is not that hard. In particular, it should be possible to extend the simple approach of <code>KerasBot</code> to something more sophisticated, e.g. by borrowing ideas from AlphaGo and other approaches from the literature.</p>
+
+<p>The UI uses a fork of <a href="https://github.com/jokkebk" class="user-mention">@jokkebk</a> awesome jgoboard, and the current Go board front end is just a plain JavaScript client for the above Flask server.</p>
+
+<h2>
+<a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Motivation</h2>
+
+<p>Being both a passionate and mediocre Go player and programmer, this project is a matter of honor to me. Also, I tried to get in touch with the AlphaGo team, as I'm very curious to hear what their AI has to say about the probability of the most famous of all Go moves, Shusaku's ear reddening move. Well, I never heard back from them, so I had to take matters into my own hands. Also, after white move 78 in game 4 of AlphaGo against Lee Sedol, the ear reddening move might even have lost its mythical number one position. Thanks again. Anyway, here you go:</p>
+
+<p><img src="ear_reddening.png" alt="ear-reddening"></p>
+
+<h2>
+<a id="literature" class="anchor" href="#literature" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Literature</h2>
+
+<p>[1] A. Clark, A. Storkey <a href="http://arxiv.org/pdf/1412.3409v2.pdf">Teaching Deep Convolutional Neural Networks to Play Go</a>.</p>
+
+<p>[2] C.J. Maddison, A. Huang, I. Sutskever, D. Silver <a href="http://arxiv.org/pdf/1412.6564v2.pdf">Move Evaluation in Go using Deep Neural Networks</a></p>
+
+<p>[3] D. Silver, A. Huang, C.J. Maddison, A. Guez, L. Sifre, G. van den Driessche, J. Schrittwieser, I. Antonoglou, V. Panneershelvam, M. Lanctot, S. Dieleman, D. Grewe, J. Nham, N. Kalchbrenner, I. Sutskever, T. Lillicrap, M. Leach, K. Kavukcuoglu, T. Graepel  &amp; D. Hassabis <a href="http://www.nature.com/nature/journal/v529/n7587/full/nature16961.html">Mastering the game of Go with deep neural networks and tree search</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Betago maintained by <a href="https://github.com/maxpumperla">maxpumperla</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
