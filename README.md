@@ -1,10 +1,12 @@
 # BetaGo
 *So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!*
 
-BetaGo lets you roll your very own Go engine. It downloads go games for you, preprocesses them, trains a model , e.g. a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your handcrafted & artisanal Go bot.
+![betago-demo](betago.gif)
+
+BetaGo lets you roll your own Go engine. It downloads Go games for you, preprocesses them, trains a model on data, e.g. a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your own Go bot.
 
 ## It's alive
-Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a few reasonable moves, but is still very weak. 
+Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a reasonable moves, but is still very weak.
 ```{python}
 pip install betago
 git clone https://github.com/maxpumperla/betago
@@ -20,8 +22,7 @@ You can modify and extend any of the steps outlined above and help decrease the 
 
 ## How can I run my own bot?
 Training and serving a bot can be done in just a few steps. The following example uses a convolutional neural network implemented in keras, but you are free to choose other libraries as well. The code for this example can be found in the examples folder.
-We start by defining a Go data processor, which downloads an preprocesses Go games. A regular Go board consists of 19 times 19 fields. The ```SevenPlaneProcessor``` loads seven planes of 19*19 data points,
-three layers representing moves for each color and one for ko.
+We start by defining a Go data processor, which downloads an preprocesses Go games. A regular Go board consists of 19 times 19 fields. The ```SevenPlaneProcessor```, inspired by [1] loads seven planes of ```19*19``` data points, three layers representing moves of varying liberties for each color and one capturing for ko.
 ```{python}
 from betago.dataloader.processor import SevenPlaneProcessor
 processor = SevenPlaneProcessor()
@@ -32,7 +33,7 @@ X, y = processor.load_go_data(num_samples=1000)
 X = X.astype('float32')
 Y = np_utils.to_categorical(y, nb_classes)
 ```
-Next, we train a neural net to predict moves. If you insist, you may call it a policy network.
+Next, we train a neural network to predict moves. If you insist, you may call it a policy network. This example is just one of many possible architectures to tackle this problem and by no means optimal. Feel free to add or adapt layers and come up with your own experiments. We use the new Keras 1.0 here, but you could use older versions as well.
 
 ```{python}
 batch_size = 128
@@ -53,30 +54,32 @@ model.add(Activation('relu'))
 model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.2))
 model.add(Flatten())
-model.add(Dense(128))
+model.add(Dense(256))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adadelta')
+model.compile(loss='categorical_crossentropy',
+              optimizer='adadelta',
+              metrics=['accuracy'])
 
 # Fit the model to data
-model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch,
-          show_accuracy=True, verbose=1)
+model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
 ```
 
-With processor and model we can initialize a ```KerasBot```, which will serve the model for us.
+With ```processor``` and ```model``` we can initialize a so called ```KerasBot```, which will serve the model for us.
 ```{python}
 import os
 import webbrowser
 # Open web frontend, assuming you cd'ed into betago
 webbrowser.open('file://' + os.getcwd() + '/ui/demoBot.html', new=2)
 
-# Create a bot from processor and model, then serve it.
+# Create a bot from processor and model, then run it.
 from betago.model import KerasBot
 go_model = KerasBot(model=model, processor=processor)
+go_model.run()
 ```
 
 
