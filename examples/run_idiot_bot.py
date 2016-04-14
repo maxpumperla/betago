@@ -7,4 +7,5 @@ path = os.getcwd().replace('/examples', '')
 webbrowser.open('file://' + path + '/ui/demoBot.html', new=2)
 
 # Create an idiot bot, creating random moves and serve it.
-go_model = IdiotBot()
+go_bot = IdiotBot()
+go_bot.run()

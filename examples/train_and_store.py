@@ -7,7 +7,7 @@ from keras.utils import np_utils
 from betago.dataloader.processor import SevenPlaneProcessor
 
 batch_size = 128
-nb_epoch = 20
+nb_epoch = 10
 
 nb_classes = 19 * 19  # One class for each position on the board
 go_board_rows, go_board_cols = 19, 19  # input dimensions of go board
@@ -40,11 +40,9 @@ model.add(Activation('relu'))
 model.add(Dropout(0.5))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adadelta')
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-
-model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch,
-          show_accuracy=True, verbose=1)
+model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
 
 weight_file = '../model_zoo/weights.hd5'
 model.save_weights(weight_file, overwrite=True)

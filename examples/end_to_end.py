@@ -35,18 +35,17 @@ model.add(Activation('relu'))
 model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
-model.add(Dropout(0.25))
+model.add(Dropout(0.2))
 model.add(Flatten())
-model.add(Dense(128))
+model.add(Dense(256))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adadelta')
+model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-# Fit the model to data
-model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch,
-          show_accuracy=True, verbose=1)
+# Fit model to data
+model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
 
 # Open web frontend
 path = os.getcwd().replace('/examples', '')
@@ -54,3 +53,4 @@ webbrowser.open('file://' + path + '/ui/demoBot.html', new=2)
 
 # Create a bot from processor and model, then serve it.
 go_model = KerasBot(model=model, processor=processor)
+go_model.run()
