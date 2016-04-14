@@ -1,5 +1,5 @@
 import numpy as np
-from .base_processor import GoDataProcessor, GoFileProcessor
+from .dataloader.base_processor import GoDataProcessor, GoFileProcessor
 
 
 class SevenPlaneProcessor(GoDataProcessor):
