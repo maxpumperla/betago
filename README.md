@@ -1,16 +1,22 @@
 # BetaGo
 *So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!*
 
-BetaGo lets you roll your very own go engine. It downloads go games, preprocesses them, trains a model , e.g. a neural network using keras, on data and serves the trained model to an HTML front end, which you can use to play against your very own handcrafted, artisanal Go bot. You can modify and extend any of these steps along the way and help decrease the gap between AlphaGo and BetaGo, tear down walls and disrupt the establishment.
+BetaGo lets you roll your very own Go engine. It downloads go games for you, preprocesses them, trains a model , e.g. a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your handcrafted & artisanal Go bot.
 
 ## It's alive
-Test BetaGo by running the following commands. It should start a playable demo in your browser!
+Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a few reasonable moves, but is still very weak. 
 ```{python}
 pip install betago
 git clone https://github.com/maxpumperla/betago
 cd betago
 python run_demo.py
 ```
+
+## Contribute
+You can modify and extend any of the steps outlined above and help decrease the gap between AlphaGo and BetaGo, tear down walls and disrupt the establishment. Consider contributing by:
+- Adding new models to the model zoo.
+- Writing new Go data processing functionality.
+- Adding more complex models and bots.
 
 ## How can I run my own bot?
 Training and serving a bot can be done in just a few steps. The following example uses a convolutional neural network implemented in keras, but you are free to choose other libraries as well. The code for this example can be found in the examples folder.
