@@ -1,6 +1,6 @@
 from multiprocessing import Process
 from flask import Flask, request, jsonify
-from flask.ext.cors import CORS, cross_origin
+from flask.ext.cors import CORS
 import numpy as np
 from .dataloader.goboard import GoBoard
 from .processor import ThreePlaneProcessor
@@ -16,7 +16,7 @@ class GoModel(object):
         '''
         Parameters:
         -----------
-        processor: Instance of betago.dataloader.processor.GoDataLoader, e.g. SevenPlaneProcessor
+        processor: Instance of betago.processor.GoDataLoader, e.g. SevenPlaneProcessor
         model: In principle this can be anything that can predict go moves, given data provided by the above
                processor. In practice it may very well be (an extension of) a keras model plus glue code.
         '''
@@ -50,7 +50,6 @@ class GoModel(object):
             return 'betago'
 
         @app.route('/prediction', methods=['GET', 'POST'])
-        @cross_origin()
         def next_move():
             '''
             Predict next move and send to client. Just a wrapper around the abstract predict method.

@@ -6,7 +6,7 @@ from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
 from betago.model import KerasBot
-from betago.dataloader.processor import SevenPlaneProcessor
+from betago.processor import SevenPlaneProcessor
 
 batch_size = 128
 nb_epoch = 20
