@@ -7,7 +7,7 @@ from keras.utils import np_utils
 from betago.processor import SevenPlaneProcessor
 
 batch_size = 128
-nb_epoch = 1
+nb_epoch = 10
 
 nb_classes = 19 * 19  # One class for each position on the board
 go_board_rows, go_board_cols = 19, 19  # input dimensions of go board
