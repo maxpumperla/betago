@@ -1,36 +1,33 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Betago : Go bots for the people">
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <title>Betago</title>
+    <title>Betago by maxpumperla</title>
   </head>
 
   <body>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/maxpumperla/betago">View on GitHub</a>
+    <header>
+      <div class="container">
+        <h1>Betago</h1>
+        <h2>Go bots for the people</h2>
 
-          <h1 id="project_title">Betago</h1>
-          <h2 id="project_tagline">Go bots for the people</h2>
+        <section id="downloads">
+          <a href="https://github.com/maxpumperla/betago/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/maxpumperla/betago/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/maxpumperla/betago" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/maxpumperla/betago/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/maxpumperla/betago/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+    <div class="container">
+      <section id="main_content">
         <h1>
 <a id="betago" class="anchor" href="#betago" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>BetaGo</h1>
 
@@ -38,7 +35,7 @@
 
 <p><img src="betago.gif" alt="betago-demo"></p>
 
-<p>BetaGo lets you roll your own Go engine. It downloads Go games for you, preprocesses them, trains a model on data, e.g. a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your own Go bot.</p>
+<p>BetaGo lets you run your own Go engine. It downloads Go games for you, preprocesses them, trains a model on data, for instance a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your own Go bot.</p>
 
 <h2>
 <a id="its-alive" class="anchor" href="#its-alive" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>It's alive</h2>
@@ -67,7 +64,7 @@ python run_demo.py</pre></div>
 <p>Training and serving a bot can be done in just a few steps. The following example uses a convolutional neural network implemented in keras, but you are free to choose other libraries as well. The code for this example can be found in the examples folder.
 We start by defining a Go data processor, which downloads an preprocesses Go games. A regular Go board consists of 19 times 19 fields. The <code>SevenPlaneProcessor</code>, inspired by [1] loads seven planes of <code>19*19</code> data points, three layers representing moves of varying liberties for each color and one capturing for ko.</p>
 
-<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> betago.dataloader.processor <span class="pl-k">import</span> SevenPlaneProcessor
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> betago.processor <span class="pl-k">import</span> SevenPlaneProcessor
 processor <span class="pl-k">=</span> SevenPlaneProcessor()
 input_channels <span class="pl-k">=</span> processor.num_planes
 
@@ -149,15 +146,6 @@ go_model.run()</pre></div>
       </section>
     </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Betago maintained by <a href="https://github.com/maxpumperla">maxpumperla</a></p>
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
     
-
   </body>
 </html>
