@@ -1,65 +1,68 @@
-class_mode: categorical
-layers:
-- W_constraint: null
-  W_regularizer: null
-  activation: linear
-  activity_regularizer: null
-  b_constraint: null
-  b_regularizer: null
-  border_mode: valid
-  cache_enabled: true
-  custom_name: convolution2d
-  dim_ordering: th
-  init: glorot_uniform
-  input_shape: !!python/tuple [7, 19, 19]
-  name: Convolution2D
-  nb_col: 3
-  nb_filter: 32
-  nb_row: 3
-  subsample: &id001 !!python/tuple [1, 1]
-  trainable: true
-- {activation: relu, cache_enabled: true, custom_name: activation, name: Activation,
-  trainable: true}
-- W_constraint: null
-  W_regularizer: null
-  activation: linear
-  activity_regularizer: null
-  b_constraint: null
-  b_regularizer: null
-  border_mode: valid
-  cache_enabled: true
-  custom_name: convolution2d
-  dim_ordering: th
-  init: glorot_uniform
-  name: Convolution2D
-  nb_col: 3
-  nb_filter: 32
-  nb_row: 3
-  subsample: *id001
-  trainable: true
-- {activation: relu, cache_enabled: true, custom_name: activation, name: Activation,
-  trainable: true}
-- border_mode: valid
-  cache_enabled: true
-  custom_name: maxpooling2d
-  dim_ordering: th
-  name: MaxPooling2D
-  pool_size: &id002 !!python/tuple [2, 2]
-  strides: *id002
-  trainable: true
-- {cache_enabled: true, custom_name: dropout, name: Dropout, p: 0.25, trainable: true}
-- {cache_enabled: true, custom_name: flatten, name: Flatten, trainable: true}
-- {W_constraint: null, W_regularizer: null, activation: linear, activity_regularizer: null,
-  b_constraint: null, b_regularizer: null, cache_enabled: true, custom_name: dense,
-  init: glorot_uniform, input_dim: null, name: Dense, output_dim: 128, trainable: true}
-- {activation: relu, cache_enabled: true, custom_name: activation, name: Activation,
-  trainable: true}
-- {cache_enabled: true, custom_name: dropout, name: Dropout, p: 0.5, trainable: true}
-- {W_constraint: null, W_regularizer: null, activation: linear, activity_regularizer: null,
-  b_constraint: null, b_regularizer: null, cache_enabled: true, custom_name: dense,
-  init: glorot_uniform, input_dim: null, name: Dense, output_dim: 361, trainable: true}
-- {activation: softmax, cache_enabled: true, custom_name: activation, name: Activation,
-  trainable: true}
-loss: categorical_crossentropy
-name: Sequential
-optimizer: {epsilon: 1.0e-06, lr: 1.0, name: Adadelta, rho: 0.95}
+class_name: Sequential
+config:
+- class_name: Convolution2D
+  config:
+    W_constraint: null
+    W_regularizer: null
+    activation: linear
+    activity_regularizer: null
+    b_constraint: null
+    b_regularizer: null
+    batch_input_shape: !!python/tuple [null, 7, 19, 19]
+    border_mode: valid
+    dim_ordering: th
+    init: glorot_uniform
+    input_dtype: float32
+    name: convolution2d_1
+    nb_col: 3
+    nb_filter: 32
+    nb_row: 3
+    subsample: &id001 !!python/tuple [1, 1]
+    trainable: true
+- class_name: Activation
+  config: {activation: relu, name: activation_1, trainable: true}
+- class_name: Convolution2D
+  config:
+    W_constraint: null
+    W_regularizer: null
+    activation: linear
+    activity_regularizer: null
+    b_constraint: null
+    b_regularizer: null
+    border_mode: valid
+    dim_ordering: th
+    init: glorot_uniform
+    name: convolution2d_2
+    nb_col: 3
+    nb_filter: 32
+    nb_row: 3
+    subsample: *id001
+    trainable: true
+- class_name: Activation
+  config: {activation: relu, name: activation_2, trainable: true}
+- class_name: MaxPooling2D
+  config:
+    border_mode: valid
+    dim_ordering: th
+    name: maxpooling2d_1
+    pool_size: &id002 !!python/tuple [2, 2]
+    strides: *id002
+    trainable: true
+- class_name: Dropout
+  config: {name: dropout_1, p: 0.25, trainable: true}
+- class_name: Flatten
+  config: {name: flatten_1, trainable: true}
+- class_name: Dense
+  config: {W_constraint: null, W_regularizer: null, activation: linear, activity_regularizer: null,
+    b_constraint: null, b_regularizer: null, init: glorot_uniform, input_dim: null,
+    name: dense_1, output_dim: 128, trainable: true}
+- class_name: Activation
+  config: {activation: relu, name: activation_3, trainable: true}
+- class_name: Dropout
+  config: {name: dropout_2, p: 0.5, trainable: true}
+- class_name: Dense
+  config: {W_constraint: null, W_regularizer: null, activation: linear, activity_regularizer: null,
+    b_constraint: null, b_regularizer: null, init: glorot_uniform, input_dim: null,
+    name: dense_2, output_dim: 361, trainable: true}
+- class_name: Activation
+  config: {activation: softmax, name: activation_4, trainable: true}
