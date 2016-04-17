@@ -6,28 +6,13 @@ from .dataloader.goboard import GoBoard
 from .processor import ThreePlaneProcessor
 
 
-class GoModel(object):
+class HTTPFrontend(object):
     '''
-    GoModel is a simple Flask app served on localhost:5000, exposing a REST API to predict
+    HTTPFrontend is a simple Flask app served on localhost:5000, exposing a REST API to predict
     go moves.
     '''
-
-    def __init__(self, model, processor):
-        '''
-        Parameters:
-        -----------
-        processor: Instance of betago.processor.GoDataLoader, e.g. SevenPlaneProcessor
-        model: In principle this can be anything that can predict go moves, given data provided by the above
-               processor. In practice it may very well be (an extension of) a keras model plus glue code.
-        '''
-        self.model = model
-        self.processor = processor
-        self.go_board = GoBoard(19)
-        self.num_planes = processor.num_planes
-
-    def predict(self):
-        ''' Predict the next move '''
-        return NotImplemented
+    def __init__(self, bot):
+        self.bot = bot
 
     def start_server(self):
         ''' Start Go model server '''
@@ -51,13 +36,48 @@ class GoModel(object):
 
         @app.route('/prediction', methods=['GET', 'POST'])
         def next_move():
+            '''Predict next move and send to client.
+
+            Parses the move and hands the work off to the bot.
             '''
-            Predict next move and send to client. Just a wrapper around the abstract predict method.
-            '''
-            val = self.predict()
-            return val
+            content = request.json
+            row = content['i']
+            col = content['j']
+            self.bot.apply_move((row, col))
+
+            bot_row, bot_col = self.bot.select_move()
+            print('Prediction:')
+            print(bot_row, bot_col)
+            result = {'i': bot_row, 'j': bot_col}
+            json_result = jsonify(**result)
+            return json_result
 
         self.app.run(host='0.0.0.0', debug=True, threaded=True, use_reloader=False)
+
+
+class GoModel(object):
+    '''Tracks a board and selects moves.'''
+    def __init__(self, model, processor):
+        '''
+        Parameters:
+        -----------
+        processor: Instance of betago.processor.GoDataLoader, e.g. SevenPlaneProcessor
+        model: In principle this can be anything that can predict go moves, given data provided by the above
+               processor. In practice it may very well be (an extension of) a keras model plus glue code.
+        '''
+        self.model = model
+        self.processor = processor
+        self.go_board = GoBoard(19)
+        self.num_planes = processor.num_planes
+
+    def apply_move(self, move):
+        ''' Apply the human move'''
+        return NotImplemented
+
+    def select_move(self):
+        ''' Select a move for the bot'''
+        return NotImplemented
+
 
 
 class KerasBot(GoModel):
@@ -71,22 +91,19 @@ class KerasBot(GoModel):
         super(KerasBot, self).__init__(model=model, processor=processor)
         self.top_n = top_n
 
-    def predict(self):
-        content = request.json
-
+    def apply_move(self, move):
         # Apply human move
-        row = content['i']
-        col = content['j']
-        color = 'w'
-        move = (row, col)
-        self.go_board.apply_move(color, move)
+        self.go_board.apply_move('w', move)
 
-        # Preprocess move, make prediction
-        X, label = self.processor.feature_and_label(color, move, self.go_board, self.num_planes)
+    def select_move(self):
+        bot_color = 'b'
+
+        # Turn the board into a feature vector.
+        # The (0, 0) is for generating the label, which we ignore.
+        X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
-        # Apply bot move
-        bot_color = 'b'
+        # Generate bot move.
         found_move = False
         top_n = 10
 
@@ -110,12 +127,7 @@ class KerasBot(GoModel):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
 
-        # Send back result
-        print('Prediction:')
-        print(pred_row, pred_col)
-        result = {'i': pred_row, 'j': pred_col}
-        json_result = jsonify(**result)
-        return json_result
+        return pred_move
 
 
 class IdiotBot(GoModel):
@@ -125,12 +137,10 @@ class IdiotBot(GoModel):
     def __init__(self, model=None, processor=ThreePlaneProcessor()):
         super(IdiotBot, self).__init__(model=model, processor=processor)
 
-    def predict(self):
-        content = request.json
+    def apply_move(self, move):
+        self.go_board.apply_move('w', move)
 
-        self.go_board.apply_move('w', (content['i'], content['j']))
-
-        # Apply bot move
+    def select_move(self):
         found_move = False
         if not found_move:
             while not found_move:
@@ -141,7 +151,4 @@ class IdiotBot(GoModel):
                     found_move = True
                     self.go_board.apply_move('b', pred_move)
 
-        # Send back result
-        result = {'i': pred_row, 'j': pred_col}
-        json_result = jsonify(**result)
-        return json_result
+        return pred_move
