@@ -9,7 +9,7 @@ from betago.processor import SevenPlaneProcessor
 
 processor = SevenPlaneProcessor()
 
-bot_name = 'one_epoch_cnn'
+bot_name = '100_epochs_cnn'
 model_file = 'model_zoo/' + bot_name + '_bot.yml'
 weight_file = 'model_zoo/' + bot_name + '_weights.hd5'
 

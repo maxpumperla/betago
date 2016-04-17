@@ -7,7 +7,7 @@ from keras.utils import np_utils
 from betago.processor import SevenPlaneProcessor
 
 batch_size = 128
-nb_epoch = 10
+nb_epoch = 100
 
 nb_classes = 19 * 19  # One class for each position on the board
 go_board_rows, go_board_cols = 19, 19  # input dimensions of go board
@@ -35,7 +35,7 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
 model.add(Dropout(0.25))
 model.add(Flatten())
-model.add(Dense(128))
+model.add(Dense(256))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
 model.add(Dense(nb_classes))
