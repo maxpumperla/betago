@@ -1,33 +1,11 @@
 import sys
 
-from . import response
+from . import command, response
 from .board import *
-from .command import *
 
 __all__ = [
     'GTPFrontend',
 ]
-
-
-def _parse_command(gtp_command):
-    pieces = gtp_command.split()
-    # GTP commands may include an optional sequence number. If it's
-    # provided, we must include it in the response.
-    try:
-        sequence = int(pieces[0])
-        pieces = pieces[1:]
-    except ValueError:
-        sequence = None
-    name, args = pieces[0], pieces[1:]
-    return Command(sequence, name, args)
-
-
-def _serialize_response(gtp_command, gtp_response):
-    return '%s%s %s\n\n' % (
-        '=' if gtp_response.success else '?',
-        '' if gtp_command.sequence is None else str(gtp_command.sequence),
-        gtp_response.body,
-    )
 
 
 class GTPFrontend(object):
@@ -51,9 +29,9 @@ class GTPFrontend(object):
     def run(self):
         while not self._stopped:
             ln = self._input.readline().strip()
-            command = _parse_command(ln)
-            resp = self.process(command)
-            self._output.write(_serialize_response(command, resp))
+            cmd = command.parse(ln)
+            resp = self.process(cmd)
+            self._output.write(response.serialize(cmd, resp))
             self._output.flush()
 
     def process(self, command):

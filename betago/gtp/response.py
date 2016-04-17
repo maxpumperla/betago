@@ -1,6 +1,7 @@
 __all__ = [
     'Response',
     'error',
+    'serialize',
     'success',
 ]
 
@@ -20,3 +21,16 @@ def success(body=''):
 def error(body=''):
     """Make an error GTP response."""
     return Response(status=False, body=body)
+
+
+def serialize(gtp_command, gtp_response):
+    """Serialize a GTP response as a string.
+
+    Needs the command we are responding to so we can match the sequence
+    number.
+    """
+    return '%s%s %s\n\n' % (
+        '=' if gtp_response.success else '?',
+        '' if gtp_command.sequence is None else str(gtp_command.sequence),
+        gtp_response.body,
+    )
