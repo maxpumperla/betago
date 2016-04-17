@@ -98,7 +98,7 @@ class KerasBot(GoModel):
                 pred_row = prediction // 19
                 pred_col = prediction % 19
                 pred_move = (pred_row, pred_col)
-                if not self.go_board.is_move_on_board(pred_move):
+                if self.go_board.is_move_legal(bot_color, pred_move):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
         if not found_move:
@@ -106,7 +106,7 @@ class KerasBot(GoModel):
                 pred_row = np.random.randint(19)
                 pred_col = np.random.randint(19)
                 pred_move = (pred_row, pred_col)
-                if not self.go_board.is_move_on_board(pred_move):
+                if self.go_board.is_move_legal(bot_color, pred_move):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
 
@@ -137,7 +137,7 @@ class IdiotBot(GoModel):
                 pred_row = np.random.randint(19)
                 pred_col = np.random.randint(19)
                 pred_move = (pred_row, pred_col)
-                if not self.go_board.is_move_on_board(pred_move):
+                if self.go_board.is_move_legal('b', pred_move):
                     found_move = True
                     self.go_board.apply_move('b', pred_move)
 

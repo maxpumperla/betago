@@ -2,6 +2,8 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 
+import copy
+
 
 class GoBoard(object):
     '''
@@ -45,6 +47,18 @@ class GoBoard(object):
 
     def is_move_on_board(self, move):
         return move in self.board
+
+    def is_move_suicide(self, color, pos):
+        '''Check if a proposed move would be suicide.'''
+        # Make a copy of ourself to apply the move.
+        temp_board = copy.deepcopy(self)
+        temp_board.apply_move(color, pos)
+        new_string = temp_board.go_strings[pos]
+        return new_string.get_num_liberties() == 0
+
+    def is_move_legal(self, color, pos):
+        '''Check if a proposed moved is legal.'''
+        return (not self.is_move_on_board(pos)) and not (self.is_move_suicide(color, pos))
 
     def create_go_string(self, color, pos):
         ''' Create GoString from current Board and move '''
