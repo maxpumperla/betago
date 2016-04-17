@@ -1,7 +1,7 @@
 __all__ = [
     'Response',
-    'Success',
-    'Error',
+    'error',
+    'success',
 ]
 
 
@@ -12,11 +12,11 @@ class Response(object):
         self.body = body
 
 
-class Success(Response):
-    def __init__(self, body=''):
-        super(Success, self).__init__(True, body)
+def success(body=''):
+    """Make a successful GTP response."""
+    return Response(status=True, body=body)
 
 
-class Error(Response):
-    def __init__(self, error_message=''):
-        super(Error, self).__init__(False, error_message)
+def error(body=''):
+    """Make an error GTP response."""
+    return Response(status=False, body=body)
