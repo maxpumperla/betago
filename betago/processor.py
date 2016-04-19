@@ -11,9 +11,11 @@ class SevenPlaneProcessor(GoDataProcessor):
     http://arxiv.org/abs/1412.3409
     '''
 
-    def __init__(self, data_directory='data',  num_planes=7, consolidate=True):
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True, use_generator=False):
         super(SevenPlaneProcessor, self).__init__(data_directory=data_directory,
-                                                  num_planes=num_planes, consolidate=consolidate)
+                                                  num_planes=num_planes,
+                                                  consolidate=consolidate,
+                                                  use_generator=use_generator)
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''
@@ -64,9 +66,11 @@ class ThreePlaneProcessor(GoDataProcessor):
     stone positions of each color and one for ko.
     '''
 
-    def __init__(self, data_directory='data', num_planes=3, consolidate=True):
+    def __init__(self, data_directory='data', num_planes=3, consolidate=True, use_generator=False):
         super(ThreePlaneProcessor, self).__init__(data_directory=data_directory,
-                                                  num_planes=num_planes, consolidate=consolidate)
+                                                  num_planes=num_planes,
+                                                  consolidate=consolidate,
+                                                  use_generator=use_generator)
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''

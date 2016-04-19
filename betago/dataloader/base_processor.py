@@ -3,6 +3,8 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from __future__ import print_function
 import os
+import gc
+import glob
 import os.path
 import zipfile
 import numpy as np
@@ -10,6 +12,7 @@ import argparse
 import multiprocessing
 from os import sys
 from gomill import sgf as gosgf
+from keras.utils import np_utils
 
 from .index_processor import KGSIndex
 from .sampling import Sampler
@@ -22,6 +25,39 @@ def worker(jobinfo):
         clazz(dir_name, num_planes).process_zip(dir_name, zip_file, data_file_name, game_list)
     except (KeyboardInterrupt, SystemExit):
         raise('>>> Exiting child process.')
+
+
+class DataGenerator(object):
+    def __init__(self, data_dir, samples):
+        self.data_dir = data_dir
+        self.files = set(file_name for file_name, index in samples)
+        self.samples = samples
+        self.batch_size = 128
+        self.nb_classes = 19 * 19
+        self.num_samples = 0
+
+    def _generate(self):
+        for zip_file_name in self.files:
+            file_name = zip_file_name.replace('.zip', '') + 'train'
+            base = self.data_dir + '/' + file_name + '_features_*.npy'
+            for feature_file in glob.glob(base):
+                label_file = feature_file.replace('features', 'labels')
+                X = np.load(feature_file)
+                y = np.load(label_file)
+                X = X.astype('float32')
+                y = np_utils.to_categorical(y.astype(int), self.nb_classes)
+                gc.collect()
+                while X.shape[0] >= self.batch_size:
+                    X_batch, X = X[:self.batch_size], X[self.batch_size:]
+                    y_batch, y = y[:self.batch_size], y[self.batch_size:]
+                    gc.collect()
+                    yield X_batch, y_batch
+            gc.collect()
+
+    def generate(self):
+        while True:
+            for item in self._generate():
+                yield item
 
 
 class GoBaseProcessor(object):
@@ -91,12 +127,12 @@ class GoBaseProcessor(object):
             # If consolidate flag is True, consolidate. Note that merging all data into, e.g.
             # one numpy array will be too expensive at some point.
             if self.consolidate:
-                X, y = self.consolidate_games(name, samples)
+                features_and_labels = self.consolidate_games(name, samples)
             else:
                 print('>>> No consolidation done, single files stored in data folder')
         print('>>> Finished processing')
         if self.consolidate:
-            return X, y
+            return features_and_labels
         else:
             return
 
@@ -213,9 +249,10 @@ class GoDataProcessor(GoBaseProcessor):
     '''
     GoDataProcessor generates data, e.g. numpy arrays, of features and labels and returns them to the user.
     '''
-    def __init__(self, data_directory='data', num_planes=7, consolidate=True):
+    def __init__(self, data_directory='data', num_planes=7, consolidate=True, use_generator=False):
         super(GoDataProcessor, self).__init__(data_directory=data_directory,
                                               num_planes=num_planes, consolidate=consolidate)
+        self.use_generator = use_generator
 
     def feature_and_label(self, color, move, go_board):
         '''
@@ -262,14 +299,27 @@ class GoDataProcessor(GoBaseProcessor):
             else:
                 raise(name + ' is not a valid sgf')
 
-        feature_file = dir_name + '/' + data_file_name + '_features'
-        label_file = dir_name + '/' + data_file_name + '_labels'
+        feature_file_base = dir_name + '/' + data_file_name + '_features_%d'
+        label_file_base = dir_name + '/' + data_file_name + '_labels_%d'
 
-        np.save(feature_file, features)
-        np.save(label_file, labels)
+        # Due to files with large content, split up after chunksize
+        chunk = 0
+        chunksize = 1024
+        while features.shape[0] >= chunksize:
+            feature_file = feature_file_base % chunk
+            label_file = label_file_base % chunk
+            chunk += 1
+            cur_features, features = features[:chunksize], features[chunksize:]
+            cur_labels, labels = labels[:chunksize], labels[chunksize:]
+            np.save(feature_file, cur_features)
+            np.save(label_file, cur_labels)
 
     def consolidate_games(self, name, samples):
         print('>>> Creating consolidated numpy arrays')
+
+        if self.use_generator:
+            print('>>> Return generator')
+            return DataGenerator(self.data_dir, samples)
 
         files_needed = set(file_name for file_name, index in samples)
         print('>>> Total number of files: ' + str(len(files_needed)))
