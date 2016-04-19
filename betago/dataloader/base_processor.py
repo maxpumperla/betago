@@ -32,11 +32,18 @@ class DataGenerator(object):
         self.data_dir = data_dir
         self.files = set(file_name for file_name, index in samples)
         self.samples = samples
-        self.batch_size = 128
-        self.nb_classes = 19 * 19
-        self.num_samples = 0
+        self.num_samples = None
 
-    def _generate(self):
+    def get_num_samples(self, batch_size=128, nb_classes=19*19):
+        if self.num_samples is not None:
+            return self.num_samples
+        else:
+            self.num_samples = 0
+            for X, y in self._generate(batch_size=batch_size, nb_classes=nb_classes):
+                self.num_samples += X.shape[0]
+            return self.num_samples
+
+    def _generate(self, batch_size, nb_classes):
         for zip_file_name in self.files:
             file_name = zip_file_name.replace('.zip', '') + 'train'
             base = self.data_dir + '/' + file_name + '_features_*.npy'
@@ -45,18 +52,18 @@ class DataGenerator(object):
                 X = np.load(feature_file)
                 y = np.load(label_file)
                 X = X.astype('float32')
-                y = np_utils.to_categorical(y.astype(int), self.nb_classes)
+                y = np_utils.to_categorical(y.astype(int), nb_classes)
                 gc.collect()
-                while X.shape[0] >= self.batch_size:
-                    X_batch, X = X[:self.batch_size], X[self.batch_size:]
-                    y_batch, y = y[:self.batch_size], y[self.batch_size:]
+                while X.shape[0] >= batch_size:
+                    X_batch, X = X[:batch_size], X[batch_size:]
+                    y_batch, y = y[:batch_size], y[batch_size:]
                     gc.collect()
                     yield X_batch, y_batch
             gc.collect()
 
-    def generate(self):
+    def generate(self, batch_size=128, nb_classes=19*19):
         while True:
-            for item in self._generate():
+            for item in self._generate(batch_size=batch_size, nb_classes=nb_classes):
                 yield item
 
 
@@ -319,7 +326,8 @@ class GoDataProcessor(GoBaseProcessor):
 
         if self.use_generator:
             print('>>> Return generator')
-            return DataGenerator(self.data_dir, samples)
+            generator = DataGenerator(self.data_dir, samples)
+            return generator
 
         files_needed = set(file_name for file_name, index in samples)
         print('>>> Total number of files: ' + str(len(files_needed)))
