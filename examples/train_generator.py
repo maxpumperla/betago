@@ -21,9 +21,7 @@ input_channels = processor.num_planes
 
 # Load go data and one-hot encode labels
 data_generator = processor.load_go_data(num_samples=1000)
-# TODO: Pick up Keras' fit_generator here
-X = X.astype('float32')
-Y = np_utils.to_categorical(y, nb_classes)
+print(data_generator.get_num_samples())
 
 # Specify a keras model with two convolutional layers and two dense layers,
 # connecting the (num_samples, 7, 19, 19) input to the 19*19 output vector.
@@ -43,7 +41,8 @@ model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
-model.fit(X, Y, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
+model.fit_generator(data_generator.generate(batch_size=batch_size, nb_classes=nb_classes),
+                    samples_per_epoch=data_generator.get_num_samples(), nb_epoch=nb_epoch)
 
 weight_file = '../model_zoo/weights.hd5'
 model.save_weights(weight_file, overwrite=True)
