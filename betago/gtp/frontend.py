@@ -16,7 +16,6 @@ class GTPFrontend(object):
     Extremely limited implementation right now:
      - Only supports 19x19 boards.
      - Doesn't support handicap.
-     - Can only play as black.
      - When white passes, black will pass too.
     """
     def __init__(self, bot):
@@ -57,21 +56,19 @@ class GTPFrontend(object):
         return response.success('false')
 
     def handle_play(self, player, move):
-        if player != 'white':
-            return Error('Can only play as black')
+        color = 'b' if player == 'black' else 'w'
         if move == 'pass':
             self._will_pass = True
         else:
-            self.bot.apply_move(gtp_position_to_coords(move))
+            self.bot.apply_move(color, gtp_position_to_coords(move))
         return response.success()
 
     def handle_genmove(self, player):
-        if player != 'black':
-            return response.error('Can only play as black')
+        bot_color = 'b' if player == 'black' else 'w'
         # TODO The bot should decide when the pass.
         if self._will_pass:
             return response.success('pass')
-        move = self.bot.select_move()
+        move = self.bot.select_move(bot_color)
         return response.success(coords_to_gtp_position(move))
 
     def handle_boardsize(self, size):

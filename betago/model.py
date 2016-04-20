@@ -43,9 +43,9 @@ class HTTPFrontend(object):
             content = request.json
             row = content['i']
             col = content['j']
-            self.bot.apply_move((row, col))
+            self.bot.apply_move('w', (row, col))
 
-            bot_row, bot_col = self.bot.select_move()
+            bot_row, bot_col = self.bot.select_move('b')
             print('Prediction:')
             print(bot_row, bot_col)
             result = {'i': bot_row, 'j': bot_col}
@@ -70,11 +70,11 @@ class GoModel(object):
         self.go_board = GoBoard(19)
         self.num_planes = processor.num_planes
 
-    def apply_move(self, move):
+    def apply_move(self, color, move):
         ''' Apply the human move'''
         return NotImplemented
 
-    def select_move(self):
+    def select_move(self, bot_color):
         ''' Select a move for the bot'''
         return NotImplemented
 
@@ -91,13 +91,11 @@ class KerasBot(GoModel):
         super(KerasBot, self).__init__(model=model, processor=processor)
         self.top_n = top_n
 
-    def apply_move(self, move):
+    def apply_move(self, color, move):
         # Apply human move
-        self.go_board.apply_move('w', move)
+        self.go_board.apply_move(color, move)
 
-    def select_move(self):
-        bot_color = 'b'
-
+    def select_move(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
@@ -139,13 +137,11 @@ class RandomizedKerasBot(GoModel):
     def __init__(self, model, processor):
         super(RandomizedKerasBot, self).__init__(model=model, processor=processor)
 
-    def apply_move(self, move):
+    def apply_move(self, color, move):
         # Apply human move
-        self.go_board.apply_move('w', move)
+        self.go_board.apply_move(color, move)
 
-    def select_move(self):
-        bot_color = 'b'
-
+    def select_move(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
@@ -190,18 +186,18 @@ class IdiotBot(GoModel):
     def __init__(self, model=None, processor=ThreePlaneProcessor()):
         super(IdiotBot, self).__init__(model=model, processor=processor)
 
-    def apply_move(self, move):
-        self.go_board.apply_move('w', move)
+    def apply_move(self, color, move):
+        self.go_board.apply_move(color, move)
 
-    def select_move(self):
+    def select_move(self, bot_color):
         found_move = False
         if not found_move:
             while not found_move:
                 pred_row = np.random.randint(19)
                 pred_col = np.random.randint(19)
                 pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal('b', pred_move):
+                if self.go_board.is_move_legal(bot_color, pred_move):
                     found_move = True
-                    self.go_board.apply_move('b', pred_move)
+                    self.go_board.apply_move(bot_color, pred_move)
 
         return pred_move
