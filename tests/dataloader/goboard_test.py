@@ -1,6 +1,6 @@
 import unittest
 
-from betago.dataloader.goboard import GoBoard
+from betago.dataloader.goboard import GoBoard, from_string, to_string
 
 
 class GoBoardTest(unittest.TestCase):
@@ -58,3 +58,38 @@ class GoBoardTest(unittest.TestCase):
         group = board.go_strings[4, 4]
         self.assertEqual(1, group.get_num_stones())
         self.assertEqual(4, group.get_num_liberties())
+
+    def test_from_string(self):
+        board = from_string('''
+            .b...
+            bb...
+            .....
+            ..www
+            ..w..
+        ''')
+
+        self.assertEqual(5, board.board_size)
+        self.assertNotIn((4, 0), board.board)
+        self.assertEqual('b', board.board[4, 1])
+        self.assertNotIn((4, 2), board.board)
+        self.assertNotIn((1, 0), board.board)
+        self.assertNotIn((1, 1), board.board)
+        self.assertEqual('w', board.board[1, 2])
+        self.assertEqual('w', board.board[0, 2])
+
+    def test_to_string(self):
+        board = GoBoard(5)
+        for move in [(3, 0), (3, 1), (4, 1)]:
+            board.apply_move('b', move)
+        for move in [(0, 2), (1, 2), (1, 3), (1, 4)]:
+            board.apply_move('w', move)
+
+        board_string = to_string(board)
+        lines = board_string.split('\n')
+        self.assertEqual([
+            '.b...',
+            'bb...',
+            '.....',
+            '..www',
+            '..w..',
+        ], lines)

@@ -297,3 +297,42 @@ class GoString(object):
     def __str__(self):
         result = "go_string[ stones=" + str(self.stones) + " liberties=" + str(self.liberties) + " ]"
         return result
+
+
+def from_string(board_string):
+    """Build a board from an ascii-art representation.
+
+    'b' for black stones
+    'w' for white stones
+    '.' for empty
+
+    The bottom row is row 0, and the top row is row boardsize - 1. This
+    matches the normal way you'd use board coordinates, with A1 in the
+    bottom-left.
+
+    Rows are separated by newlines. Extra whitespace is ignored.
+    """
+    rows = [line.strip() for line in board_string.strip().split("\n")]
+    boardsize = len(rows)
+    if any(len(row) != boardsize for row in rows):
+        raise ValueError('Board must be square')
+
+    board = GoBoard(boardsize)
+    rows.reverse()
+    for r, row_string in enumerate(rows):
+        for c, point in enumerate(row_string):
+            if point in ('b', 'w'):
+                board.apply_move(point, (r, c))
+    return board
+
+
+def to_string(board):
+    """Make an ascii-art representation of a board."""
+    rows = []
+    for r in xrange(board.board_size):
+        row = ''
+        for c in xrange(board.board_size):
+            row += board.board.get((r, c), '.')
+        rows.append(row)
+    rows.reverse()
+    return '\n'.join(rows)
