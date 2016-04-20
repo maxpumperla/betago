@@ -1,6 +1,6 @@
 import unittest
 
-from .board import coords_to_gtp_position, gtp_position_to_coords
+from betago.gtp.board import coords_to_gtp_position, gtp_position_to_coords
 
 
 class GTPCoordinateTest(unittest.TestCase):

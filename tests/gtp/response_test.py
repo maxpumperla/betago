@@ -1,6 +1,6 @@
 import unittest
 
-from . import command, response
+from betago.gtp import command, response
 
 
 class ResponseTestCase(unittest.TestCase):

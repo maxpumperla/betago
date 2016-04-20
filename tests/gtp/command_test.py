@@ -1,6 +1,6 @@
 import unittest
 
-from . import command
+from betago.gtp import command
 
 
 class CommandTestCase(unittest.TestCase):
@@ -11,7 +11,6 @@ class CommandTestCase(unittest.TestCase):
             name='play',
             args=('white', 'D4'),
         )
-
         self.assertEqual(expected, command.parse(command_string))
 
     def test_parse_with_sequence_number(self):
@@ -21,5 +20,4 @@ class CommandTestCase(unittest.TestCase):
             name='play',
             args=('white', 'D4'),
         )
-
         self.assertEqual(expected, command.parse(command_string))

@@ -1,6 +1,6 @@
 import unittest
 
-from .goboard import GoBoard
+from betago.dataloader.goboard import GoBoard
 
 
 class GoBoardTest(unittest.TestCase):
