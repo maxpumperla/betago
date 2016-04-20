@@ -1,4 +1,6 @@
+import copy
 from multiprocessing import Process
+
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS
 import numpy as np
@@ -69,6 +71,10 @@ class GoModel(object):
         self.processor = processor
         self.go_board = GoBoard(19)
         self.num_planes = processor.num_planes
+
+    def set_board(self, board):
+        '''Set the board to a specific state.'''
+        self.go_board = copy.deepcopy(board)
 
     def apply_move(self, color, move):
         ''' Apply the human move'''

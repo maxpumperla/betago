@@ -2,10 +2,14 @@ import sys
 
 from . import command, response
 from .board import *
+from ..dataloader.goboard import GoBoard
 
 __all__ = [
     'GTPFrontend',
 ]
+
+# Fixed handicap placement as defined in GTP spec.
+HANDICAP_STONES = ['D4', 'Q16', 'D16', 'Q4', 'D10', 'Q10', 'K4', 'K16', 'K10']
 
 
 class GTPFrontend(object):
@@ -15,7 +19,7 @@ class GTPFrontend(object):
 
     Extremely limited implementation right now:
      - Only supports 19x19 boards.
-     - Doesn't support handicap.
+     - Only supports fixed handicaps.
      - When white passes, black will pass too.
     """
     def __init__(self, bot):
@@ -36,11 +40,13 @@ class GTPFrontend(object):
     def process(self, command):
         handlers = {
             'boardsize': self.handle_boardsize,
-            'clear_board': self.ignore,
+            'clear_board': self.handle_clear_board,
+            'fixed_handicap': self.handle_fixed_handicap,
             'genmove': self.handle_genmove,
             'known_command': self.handle_known_command,
             'komi': self.ignore,
             'play': self.handle_play,
+            'protocol_version': self.handle_protocol_version,
             'quit': self.handle_quit,
         }
         handler = handlers.get(command.name, self.handle_unknown)
@@ -49,6 +55,10 @@ class GTPFrontend(object):
 
     def ignore(self, *args):
         """Placeholder for commands we haven't dealt with yet."""
+        return response.success()
+
+    def handle_clear_board(self):
+        self.bot.set_board(GoBoard())
         return response.success()
 
     def handle_known_command(self, command_name):
@@ -82,3 +92,12 @@ class GTPFrontend(object):
 
     def handle_unknown(self, *args):
         return response.error('Unrecognized command')
+
+    def handle_fixed_handicap(self, nstones):
+        nstones = int(nstones)
+        for stone in HANDICAP_STONES[:nstones]:
+            self.bot.apply_move('b', gtp_position_to_coords(stone))
+        return response.success()
+
+    def handle_protocol_version(self):
+        return response.success('2')
