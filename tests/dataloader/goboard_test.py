@@ -59,6 +59,25 @@ class GoBoardTest(unittest.TestCase):
         self.assertEqual(1, group.get_num_stones())
         self.assertEqual(4, group.get_num_liberties())
 
+    def test_is_move_legal_ko(self):
+        board = GoBoard()
+        # Set up a ko.
+        board.apply_move('b', (4, 4))
+        board.apply_move('b', (5, 5))
+        board.apply_move('b', (6, 4))
+        board.apply_move('b', (5, 3))
+        board.apply_move('w', (4, 5))
+        board.apply_move('w', (5, 6))
+        board.apply_move('w', (6, 5))
+        # White captures.
+        board.apply_move('w', (5, 4))
+
+        # Black can't fill in the ko.
+        self.assertTrue(board.is_simple_ko('b', (5, 5)))
+        self.assertFalse(board.is_move_legal('b', (5, 5)))
+        # But white can.
+        self.assertTrue(board.is_move_legal('w', (5, 5)))
+
     def test_from_string(self):
         board = from_string('''
             .b...

@@ -25,3 +25,6 @@ class ScoringTestCase(unittest.TestCase):
         self.assertEqual(20, territory.num_black_stones)
         self.assertEqual(20, territory.num_white_stones)
         self.assertEqual(27, territory.num_dame)
+
+        self.assertIn((0, 0), territory.dame_points)
+        self.assertNotIn((8, 0), territory.dame_points)

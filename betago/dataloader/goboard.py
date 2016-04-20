@@ -58,7 +58,9 @@ class GoBoard(object):
 
     def is_move_legal(self, color, pos):
         '''Check if a proposed moved is legal.'''
-        return (not self.is_move_on_board(pos)) and not (self.is_move_suicide(color, pos))
+        return (not self.is_move_on_board(pos)) and \
+            (not self.is_move_suicide(color, pos)) and \
+            (not self.is_simple_ko(color, pos))
 
     def create_go_string(self, color, pos):
         ''' Create GoString from current Board and move '''

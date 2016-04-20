@@ -1,9 +1,11 @@
 import copy
+import random
 from multiprocessing import Process
 
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS
 import numpy as np
+from . import scoring
 from .dataloader.goboard import GoBoard
 from .processor import ThreePlaneProcessor
 
@@ -102,6 +104,11 @@ class KerasBot(GoModel):
         self.go_board.apply_move(color, move)
 
     def select_move(self, bot_color):
+        # Pass when we've filled in all the dame.
+        status = scoring.evaluate_territory(self.go_board)
+        if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
+            return None
+
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
@@ -109,7 +116,6 @@ class KerasBot(GoModel):
 
         # Generate bot move.
         found_move = False
-        top_n = 10
 
         pred = np.squeeze(self.model.predict(X))
         top_n_pred_idx = pred.argsort()[-top_n:][::-1]
@@ -123,13 +129,30 @@ class KerasBot(GoModel):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
         if not found_move:
-            while not found_move:
-                pred_row = np.random.randint(19)
-                pred_col = np.random.randint(19)
+            # Fill in a random dame point. This is probably not a good
+            # move, but at least we aren't filling in our own eyes.
+            dame_points = copy.copy(status.dame_points)
+            random.shuffle(dame_points)
+            for pred_move in dame_points:
+                if self.go_board.is_move_legal(bot_color, pred_move):
+                    found_move = True
+                    self.go_board.apply_move(bot_color, pred_move)
+                    break
+        if not found_move:
+            candidates = np.arange(19 * 19)
+            np.random.shuffle(candidates)
+            for move in candidates:
+                pred_row = move // 19
+                pred_col = move % 19
                 pred_move = (pred_row, pred_col)
                 if self.go_board.is_move_legal(bot_color, pred_move):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
+                    break
+
+        if not found_move:
+            # There are no legal moves left, so pass.
+            return None
 
         return pred_move
 
@@ -148,6 +171,11 @@ class RandomizedKerasBot(GoModel):
         self.go_board.apply_move(color, move)
 
     def select_move(self, bot_color):
+        # Pass when we've filled in all the dame.
+        status = scoring.evaluate_territory(self.go_board)
+        if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
+            return None
+
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
@@ -155,7 +183,7 @@ class RandomizedKerasBot(GoModel):
 
         # Generate bot move.
         found_move = False
-        n_samples = 25
+        n_samples = 10
         pred = np.squeeze(self.model.predict(X))
         # Square the predictions to increase the difference between the
         # best and worst moves. Otherwise, it will make too many
@@ -172,8 +200,19 @@ class RandomizedKerasBot(GoModel):
                 found_move = True
                 self.go_board.apply_move(bot_color, pred_move)
                 break
-        # None of the model's choices were valid; pick a random move.
         if not found_move:
+            # Fill in a random dame point. This is probably not a good
+            # move, but at least we aren't filling in our own eyes.
+            dame_points = copy.copy(status.dame_points)
+            random.shuffle(dame_points)
+            for pred_move in dame_points:
+                if self.go_board.is_move_legal(bot_color, pred_move):
+                    found_move = True
+                    self.go_board.apply_move(bot_color, pred_move)
+                    break
+        # If nothing else worked, pick a random move.
+        if not found_move:
+            candidates = np.random.shuffle(np.arange(19 * 19))
             while not found_move:
                 pred_row = np.random.randint(19)
                 pred_col = np.random.randint(19)
@@ -181,6 +220,9 @@ class RandomizedKerasBot(GoModel):
                 if self.go_board.is_move_legal(bot_color, pred_move):
                     found_move = True
                     self.go_board.apply_move(bot_color, pred_move)
+
+        if not found_move:
+            return None
 
         return pred_move
 
