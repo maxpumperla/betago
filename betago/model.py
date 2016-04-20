@@ -130,6 +130,59 @@ class KerasBot(GoModel):
         return pred_move
 
 
+class RandomizedKerasBot(GoModel):
+    '''
+    Takes a weighted sample from the predictions of a keras model. If none of those moves is legal,
+    pick a random move.
+    '''
+
+    def __init__(self, model, processor):
+        super(RandomizedKerasBot, self).__init__(model=model, processor=processor)
+
+    def apply_move(self, move):
+        # Apply human move
+        self.go_board.apply_move('w', move)
+
+    def select_move(self):
+        bot_color = 'b'
+
+        # Turn the board into a feature vector.
+        # The (0, 0) is for generating the label, which we ignore.
+        X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
+        X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
+
+        # Generate bot move.
+        found_move = False
+        n_samples = 25
+        pred = np.squeeze(self.model.predict(X))
+        # Square the predictions to increase the difference between the
+        # best and worst moves. Otherwise, it will make too many
+        # nonsense moves. (There's no scientific basis for this, it's
+        # just an ad-hoc adjustment)
+        pred *= pred
+        pred /= pred.sum()
+        moves = np.random.choice(19 * 19, size=n_samples, replace=False, p=pred)
+        for prediction in moves:
+            pred_row = prediction // 19
+            pred_col = prediction % 19
+            pred_move = (pred_row, pred_col)
+            if self.go_board.is_move_legal(bot_color, pred_move):
+                found_move = True
+                self.go_board.apply_move(bot_color, pred_move)
+                break
+        # None of the model's choices were valid; pick a random move.
+        if not found_move:
+            while not found_move:
+                pred_row = np.random.randint(19)
+                pred_col = np.random.randint(19)
+                pred_move = (pred_row, pred_col)
+                if self.go_board.is_move_legal(bot_color, pred_move):
+                    found_move = True
+                    self.go_board.apply_move(bot_color, pred_move)
+
+        return pred_move
+
+
 class IdiotBot(GoModel):
     '''
     Play random moves, like a good 30k bot.
