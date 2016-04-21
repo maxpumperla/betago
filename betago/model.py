@@ -231,8 +231,8 @@ def get_first_valid_move(board, color, move_generator):
 
 def generate_in_random_order(point_list):
     """Yield all points in the list in a random order."""
-    point_list = copy(point_list)
-    point_list.shuffle()
+    point_list = copy.copy(point_list)
+    random.shuffle(point_list)
     for candidate in point_list:
         yield candidate
 
