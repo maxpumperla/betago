@@ -1,5 +1,6 @@
 import copy
 import random
+from itertools import chain, product
 from multiprocessing import Process
 
 from flask import Flask, request, jsonify
@@ -109,52 +110,38 @@ class KerasBot(GoModel):
         if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
             return None
 
+        move = get_first_valid_move(self.go_board, bot_color,
+                                    self._move_generator(bot_color, status))
+        self.go_board.apply_move(bot_color, move)
+        return move
+
+    def _move_generator(self, bot_color, board_status):
+        return chain(
+            # First try the model.
+            self._model_moves(bot_color),
+            # If none of the model moves are valid, fill in a random
+            # dame point. This is probably not a very good move, but
+            # it's better than randomly filling in our own eyes.
+            generate_in_random_order(board_status.dame_points),
+            # Lastly just try any open space.
+            generate_in_random_order(all_empty_points(self.go_board)),
+        )
+
+    def _model_moves(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
         # Generate bot move.
-        found_move = False
-
         pred = np.squeeze(self.model.predict(X))
-        top_n_pred_idx = pred.argsort()[-top_n:][::-1]
+        top_n_pred_idx = pred.argsort()[-self.top_n:][::-1]
         for idx in top_n_pred_idx:
-            if not found_move:
-                prediction = int(idx)
-                pred_row = prediction // 19
-                pred_col = prediction % 19
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-        if not found_move:
-            # Fill in a random dame point. This is probably not a good
-            # move, but at least we aren't filling in our own eyes.
-            dame_points = copy.copy(status.dame_points)
-            random.shuffle(dame_points)
-            for pred_move in dame_points:
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-                    break
-        if not found_move:
-            candidates = np.arange(19 * 19)
-            np.random.shuffle(candidates)
-            for move in candidates:
-                pred_row = move // 19
-                pred_col = move % 19
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-                    break
-
-        if not found_move:
-            # There are no legal moves left, so pass.
-            return None
-
-        return pred_move
+            prediction = int(idx)
+            pred_row = prediction // 19
+            pred_col = prediction % 19
+            pred_move = (pred_row, pred_col)
+            yield pred_move
 
 
 class RandomizedKerasBot(GoModel):
@@ -176,14 +163,31 @@ class RandomizedKerasBot(GoModel):
         if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
             return None
 
+        move = get_first_valid_move(self.go_board, bot_color,
+                                    self._move_generator(bot_color, status))
+        self.go_board.apply_move(bot_color, move)
+        return move
+
+    def _move_generator(self, bot_color, board_status):
+        return chain(
+            # First try the model.
+            self._model_moves(bot_color),
+            # If none of the model moves are valid, fill in a random
+            # dame point. This is probably not a very good move, but
+            # it's better than randomly filling in our own eyes.
+            generate_in_random_order(board_status.dame_points),
+            # Lastly just try any open space.
+            generate_in_random_order(all_empty_points(self.go_board)),
+        )
+
+    def _model_moves(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
-        # Generate bot move.
-        found_move = False
-        n_samples = 10
+        # Generate moves from the keras model.
+        n_samples = 20
         pred = np.squeeze(self.model.predict(X))
         # Square the predictions to increase the difference between the
         # best and worst moves. Otherwise, it will make too many
@@ -195,36 +199,7 @@ class RandomizedKerasBot(GoModel):
         for prediction in moves:
             pred_row = prediction // 19
             pred_col = prediction % 19
-            pred_move = (pred_row, pred_col)
-            if self.go_board.is_move_legal(bot_color, pred_move):
-                found_move = True
-                self.go_board.apply_move(bot_color, pred_move)
-                break
-        if not found_move:
-            # Fill in a random dame point. This is probably not a good
-            # move, but at least we aren't filling in our own eyes.
-            dame_points = copy.copy(status.dame_points)
-            random.shuffle(dame_points)
-            for pred_move in dame_points:
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-                    break
-        # If nothing else worked, pick a random move.
-        if not found_move:
-            candidates = np.random.shuffle(np.arange(19 * 19))
-            while not found_move:
-                pred_row = np.random.randint(19)
-                pred_col = np.random.randint(19)
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-
-        if not found_move:
-            return None
-
-        return pred_move
+            yield (pred_row, pred_col)
 
 
 class IdiotBot(GoModel):
@@ -238,14 +213,34 @@ class IdiotBot(GoModel):
         self.go_board.apply_move(color, move)
 
     def select_move(self, bot_color):
-        found_move = False
-        if not found_move:
-            while not found_move:
-                pred_row = np.random.randint(19)
-                pred_col = np.random.randint(19)
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
+        move = get_first_valid_move(
+            self.go_board, bot_color,
+            generate_randomized(all_empty_points(self.go_board)))
 
-        return pred_move
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
+        return move
+
+
+def get_first_valid_move(board, color, move_generator):
+    for move in move_generator:
+        if board.is_move_legal(color, move):
+            return move
+    return None
+
+
+def generate_in_random_order(point_list):
+    """Yield all points in the list in a random order."""
+    point_list = copy(point_list)
+    point_list.shuffle()
+    for candidate in point_list:
+        yield candidate
+
+
+def all_empty_points(board):
+    """Return all empty positions on the board."""
+    empty_points = []
+    for point in product(xrange(board.board_size), xrange(board.board_size)):
+        if point not in board.board:
+            empty_points.append(point)
+    return empty_points
