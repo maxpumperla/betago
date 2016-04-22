@@ -1,7 +1,7 @@
 import unittest
 
-from . import model
-from .dataloader import goboard
+from betago import model
+from betago.dataloader import goboard
 
 
 class ModelTestCase(unittest.TestCase):
