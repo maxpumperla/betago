@@ -105,24 +105,20 @@ class KerasBot(GoModel):
         self.go_board.apply_move(color, move)
 
     def select_move(self, bot_color):
-        # Pass when we've filled in all the dame.
-        status = scoring.evaluate_territory(self.go_board)
-        if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
-            return None
-
         move = get_first_valid_move(self.go_board, bot_color,
-                                    self._move_generator(bot_color, status))
-        self.go_board.apply_move(bot_color, move)
+                                    self._move_generator(bot_color))
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
         return move
 
-    def _move_generator(self, bot_color, board_status):
+    def _move_generator(self, bot_color):
         return chain(
             # First try the model.
             self._model_moves(bot_color),
             # If none of the model moves are valid, fill in a random
             # dame point. This is probably not a very good move, but
             # it's better than randomly filling in our own eyes.
-            generate_in_random_order(board_status.dame_points),
+            fill_dame(self.go_board),
             # Lastly just try any open space.
             generate_in_random_order(all_empty_points(self.go_board)),
         )
@@ -158,24 +154,20 @@ class RandomizedKerasBot(GoModel):
         self.go_board.apply_move(color, move)
 
     def select_move(self, bot_color):
-        # Pass when we've filled in all the dame.
-        status = scoring.evaluate_territory(self.go_board)
-        if status.num_dame == 0 and status.num_black_stones + status.num_white_stones > 10:
-            return None
-
         move = get_first_valid_move(self.go_board, bot_color,
-                                    self._move_generator(bot_color, status))
-        self.go_board.apply_move(bot_color, move)
+                                    self._move_generator(bot_color))
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
         return move
 
-    def _move_generator(self, bot_color, board_status):
+    def _move_generator(self, bot_color):
         return chain(
             # First try the model.
             self._model_moves(bot_color),
             # If none of the model moves are valid, fill in a random
             # dame point. This is probably not a very good move, but
             # it's better than randomly filling in our own eyes.
-            generate_in_random_order(board_status.dame_points),
+            fill_dame(self.go_board),
             # Lastly just try any open space.
             generate_in_random_order(all_empty_points(self.go_board)),
         )
@@ -189,11 +181,11 @@ class RandomizedKerasBot(GoModel):
         # Generate moves from the keras model.
         n_samples = 20
         pred = np.squeeze(self.model.predict(X))
-        # Square the predictions to increase the difference between the
+        # Cube the predictions to increase the difference between the
         # best and worst moves. Otherwise, it will make too many
         # nonsense moves. (There's no scientific basis for this, it's
         # just an ad-hoc adjustment)
-        pred *= pred
+        pred = pred * pred * pred
         pred /= pred.sum()
         moves = np.random.choice(19 * 19, size=n_samples, replace=False, p=pred)
         for prediction in moves:
@@ -224,7 +216,7 @@ class IdiotBot(GoModel):
 
 def get_first_valid_move(board, color, move_generator):
     for move in move_generator:
-        if board.is_move_legal(color, move):
+        if move is None or board.is_move_legal(color, move):
             return move
     return None
 
@@ -244,3 +236,12 @@ def all_empty_points(board):
         if point not in board.board:
             empty_points.append(point)
     return empty_points
+
+
+def fill_dame(board):
+    status = scoring.evaluate_territory(board)
+    # Pass when all dame are filled.
+    if status.num_dame == 0:
+        yield None
+    for dame_point in generate_in_random_order(status.dame_points):
+        yield dame_point
