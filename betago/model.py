@@ -1,7 +1,12 @@
+import copy
+import random
+from itertools import chain, product
 from multiprocessing import Process
+
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS
 import numpy as np
+from . import scoring
 from .dataloader.goboard import GoBoard
 from .processor import ThreePlaneProcessor
 
@@ -43,9 +48,9 @@ class HTTPFrontend(object):
             content = request.json
             row = content['i']
             col = content['j']
-            self.bot.apply_move((row, col))
+            self.bot.apply_move('w', (row, col))
 
-            bot_row, bot_col = self.bot.select_move()
+            bot_row, bot_col = self.bot.select_move('b')
             print('Prediction:')
             print(bot_row, bot_col)
             result = {'i': bot_row, 'j': bot_col}
@@ -70,11 +75,15 @@ class GoModel(object):
         self.go_board = GoBoard(19)
         self.num_planes = processor.num_planes
 
-    def apply_move(self, move):
+    def set_board(self, board):
+        '''Set the board to a specific state.'''
+        self.go_board = copy.deepcopy(board)
+
+    def apply_move(self, color, move):
         ''' Apply the human move'''
         return NotImplemented
 
-    def select_move(self):
+    def select_move(self, bot_color):
         ''' Select a move for the bot'''
         return NotImplemented
 
@@ -91,43 +100,98 @@ class KerasBot(GoModel):
         super(KerasBot, self).__init__(model=model, processor=processor)
         self.top_n = top_n
 
-    def apply_move(self, move):
+    def apply_move(self, color, move):
         # Apply human move
-        self.go_board.apply_move('w', move)
+        self.go_board.apply_move(color, move)
 
-    def select_move(self):
-        bot_color = 'b'
+    def select_move(self, bot_color):
+        move = get_first_valid_move(self.go_board, bot_color,
+                                    self._move_generator(bot_color))
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
+        return move
 
+    def _move_generator(self, bot_color):
+        return chain(
+            # First try the model.
+            self._model_moves(bot_color),
+            # If none of the model moves are valid, fill in a random
+            # dame point. This is probably not a very good move, but
+            # it's better than randomly filling in our own eyes.
+            fill_dame(self.go_board),
+            # Lastly just try any open space.
+            generate_in_random_order(all_empty_points(self.go_board)),
+        )
+
+    def _model_moves(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
         X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
         # Generate bot move.
-        found_move = False
-        top_n = 10
-
         pred = np.squeeze(self.model.predict(X))
-        top_n_pred_idx = pred.argsort()[-top_n:][::-1]
+        top_n_pred_idx = pred.argsort()[-self.top_n:][::-1]
         for idx in top_n_pred_idx:
-            if not found_move:
-                prediction = int(idx)
-                pred_row = prediction // 19
-                pred_col = prediction % 19
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
-        if not found_move:
-            while not found_move:
-                pred_row = np.random.randint(19)
-                pred_col = np.random.randint(19)
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal(bot_color, pred_move):
-                    found_move = True
-                    self.go_board.apply_move(bot_color, pred_move)
+            prediction = int(idx)
+            pred_row = prediction // 19
+            pred_col = prediction % 19
+            pred_move = (pred_row, pred_col)
+            yield pred_move
 
-        return pred_move
+
+class RandomizedKerasBot(GoModel):
+    '''
+    Takes a weighted sample from the predictions of a keras model. If none of those moves is legal,
+    pick a random move.
+    '''
+
+    def __init__(self, model, processor):
+        super(RandomizedKerasBot, self).__init__(model=model, processor=processor)
+
+    def apply_move(self, color, move):
+        # Apply human move
+        self.go_board.apply_move(color, move)
+
+    def select_move(self, bot_color):
+        move = get_first_valid_move(self.go_board, bot_color,
+                                    self._move_generator(bot_color))
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
+        return move
+
+    def _move_generator(self, bot_color):
+        return chain(
+            # First try the model.
+            self._model_moves(bot_color),
+            # If none of the model moves are valid, fill in a random
+            # dame point. This is probably not a very good move, but
+            # it's better than randomly filling in our own eyes.
+            fill_dame(self.go_board),
+            # Lastly just try any open space.
+            generate_in_random_order(all_empty_points(self.go_board)),
+        )
+
+    def _model_moves(self, bot_color):
+        # Turn the board into a feature vector.
+        # The (0, 0) is for generating the label, which we ignore.
+        X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
+        X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
+
+        # Generate moves from the keras model.
+        n_samples = 20
+        pred = np.squeeze(self.model.predict(X))
+        # Cube the predictions to increase the difference between the
+        # best and worst moves. Otherwise, it will make too many
+        # nonsense moves. (There's no scientific basis for this, it's
+        # just an ad-hoc adjustment)
+        pred = pred * pred * pred
+        pred /= pred.sum()
+        moves = np.random.choice(19 * 19, size=n_samples, replace=False, p=pred)
+        for prediction in moves:
+            pred_row = prediction // 19
+            pred_col = prediction % 19
+            yield (pred_row, pred_col)
 
 
 class IdiotBot(GoModel):
@@ -137,18 +201,47 @@ class IdiotBot(GoModel):
     def __init__(self, model=None, processor=ThreePlaneProcessor()):
         super(IdiotBot, self).__init__(model=model, processor=processor)
 
-    def apply_move(self, move):
-        self.go_board.apply_move('w', move)
+    def apply_move(self, color, move):
+        self.go_board.apply_move(color, move)
 
-    def select_move(self):
-        found_move = False
-        if not found_move:
-            while not found_move:
-                pred_row = np.random.randint(19)
-                pred_col = np.random.randint(19)
-                pred_move = (pred_row, pred_col)
-                if self.go_board.is_move_legal('b', pred_move):
-                    found_move = True
-                    self.go_board.apply_move('b', pred_move)
+    def select_move(self, bot_color):
+        move = get_first_valid_move(
+            self.go_board, bot_color,
+            generate_randomized(all_empty_points(self.go_board)))
 
-        return pred_move
+        if move is not None:
+            self.go_board.apply_move(bot_color, move)
+        return move
+
+
+def get_first_valid_move(board, color, move_generator):
+    for move in move_generator:
+        if move is None or board.is_move_legal(color, move):
+            return move
+    return None
+
+
+def generate_in_random_order(point_list):
+    """Yield all points in the list in a random order."""
+    point_list = copy.copy(point_list)
+    random.shuffle(point_list)
+    for candidate in point_list:
+        yield candidate
+
+
+def all_empty_points(board):
+    """Return all empty positions on the board."""
+    empty_points = []
+    for point in product(range(board.board_size), range(board.board_size)):
+        if point not in board.board:
+            empty_points.append(point)
+    return empty_points
+
+
+def fill_dame(board):
+    status = scoring.evaluate_territory(board)
+    # Pass when all dame are filled.
+    if status.num_dame == 0:
+        yield None
+    for dame_point in generate_in_random_order(status.dame_points):
+        yield dame_point
