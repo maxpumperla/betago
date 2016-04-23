@@ -9,7 +9,7 @@ class Territory(object):
         self.num_white_stones = 0
         self.num_dame = 0
         self.dame_points = []
-        for point, status in territory_map.iteritems():
+        for point, status in territory_map.items():
             if status == 'b':
                 self.num_black_stones += 1
             elif status == 'w':
