@@ -331,9 +331,9 @@ def from_string(board_string):
 def to_string(board):
     """Make an ascii-art representation of a board."""
     rows = []
-    for r in xrange(board.board_size):
+    for r in range(board.board_size):
         row = ''
-        for c in xrange(board.board_size):
+        for c in range(board.board_size):
             row += board.board.get((r, c), '.')
         rows.append(row)
     rows.reverse()

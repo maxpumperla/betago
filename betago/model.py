@@ -232,7 +232,7 @@ def generate_in_random_order(point_list):
 def all_empty_points(board):
     """Return all empty positions on the board."""
     empty_points = []
-    for point in product(xrange(board.board_size), xrange(board.board_size)):
+    for point in product(range(board.board_size), range(board.board_size)):
         if point not in board.board:
             empty_points.append(point)
     return empty_points

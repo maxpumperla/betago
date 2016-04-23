@@ -31,7 +31,7 @@ def evaluate_territory(board):
     trivially dead groups.
     """
     status = {}
-    for r, c in itertools.product(xrange(board.board_size), xrange(board.board_size)):
+    for r, c in itertools.product(range(board.board_size), range(board.board_size)):
         if (r, c) in status:
             # Already visited this as part of a different group.
             continue
