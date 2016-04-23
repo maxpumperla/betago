@@ -10,7 +10,6 @@ from betago.simulate import simulate_game
 
 
 def load_keras_bot(bot_name):
-    bot_name = 'one_epoch_cnn'
     model_file = 'model_zoo/' + bot_name + '_bot.yml'
     weight_file = 'model_zoo/' + bot_name + '_weights.hd5'
     with open(model_file, 'r') as f:
