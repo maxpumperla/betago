@@ -1,13 +1,21 @@
-# BetaGo [![Build Status](https://travis-ci.org/maxpumperla/betago.svg?branch=master)](https://travis-ci.org/maxpumperla/betago)
+# BetaGo [![Build Status](https://travis-ci.org/maxpumperla/betago.svg?branch=master)](https://travis-ci.org/maxpumperla/betago) [![PyPI version](https://badge.fury.io/py/betago.svg)](https://badge.fury.io/py/betago) 
 *So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!*
 
 ![betago-demo](betago.gif)
 
 BetaGo lets you run your own Go engine. It downloads Go games for you, preprocesses them, trains a model on data, for instance a neural network using keras, and serves the trained model to an HTML front end, which you can use to play against your own Go bot.
 
-## It's alive
+## Getting started
+
 Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a reasonable moves, but is still very weak.
-```{python}
+
+### Ubuntu/Debian
+
+```{bash}
+sudo apt-get install -y python-dev python-pip python-virtualenv gfortran libhdf5-dev pkg-config
+virtualenv .betago
+. .betago/bin/activate
+pip install requests
 pip install betago
 git clone https://github.com/maxpumperla/betago
 cd betago
