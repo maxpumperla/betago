@@ -24,4 +24,4 @@ install:
   - pip install git+git://github.com/Theano/Theano.git
   - python setup.py install
   - python debug.py
-script: nosetests --with-coverage
+script: nosetests --with-coverage tests/
