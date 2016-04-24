@@ -4,7 +4,6 @@ from betago import model
 from betago.dataloader import goboard
 
 
-@unittest.skip("Temporarily disabled due to travis problems")
 class ModelTestCase(unittest.TestCase):
     def test_all_empty_points(self):
         board = goboard.from_string('''
