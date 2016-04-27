@@ -18,7 +18,7 @@ class Sampler(object):
         self.test_games = []
         self.train_games = []
         self.test_folder = 'test_samples.py'
-        self.cap_year = 2015
+        self.cap_year = cap_year
 
         random.seed(seed)
         self.compute_test_samples()
