@@ -11,12 +11,12 @@ import numpy as np
 import argparse
 import multiprocessing
 from os import sys
-from gomill import sgf as gosgf
 from keras.utils import np_utils
 
+from .. import gosgf
+from .goboard import GoBoard
 from .index_processor import KGSIndex
 from .sampling import Sampler
-from .goboard import GoBoard
 
 
 def worker(jobinfo):
