@@ -1,5 +1,7 @@
 import unittest
 
+import six
+
 from betago import model
 from betago.dataloader import goboard
 
@@ -14,7 +16,8 @@ class ModelTestCase(unittest.TestCase):
 
         empty_points = model.all_empty_points(board)
 
-        self.assertItemsEqual(
+        six.assertCountEqual(
+            self,
             [(0, 0), (1, 2), (2, 0), (2, 2)],
             empty_points)
 
