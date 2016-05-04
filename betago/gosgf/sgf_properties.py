@@ -16,6 +16,13 @@ import six
 
 from . import sgf_grammar
 
+# In python 2, indexing a str gives one-character strings.
+# In python 3, indexing a bytes gives ints.
+if six.PY2:
+    _bytestring_ord = ord
+else:
+    _bytestring_ord = lambda x: x
+
 def normalise_charset_name(s):
     """Convert an encoding name to the form implied in the SGF spec.
 
@@ -51,8 +58,8 @@ def interpret_go_point(s, size):
         return None
     # May propagate ValueError
     col_s, row_s = s
-    col = col_s - 97 # 97 == ord("a")
-    row = size - row_s + 96
+    col = _bytestring_ord(col_s) - 97 # 97 == ord("a")
+    row = size - _bytestring_ord(row_s) + 96
     if not ((0 <= col < size) and (0 <= row < size)):
         raise ValueError
     return row, col

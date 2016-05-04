@@ -296,10 +296,10 @@ class SgfTestCase(unittest.TestCase):
         self.assertEqual(g1.get_charset(), "UTF-8")
         root = g1.get_root()
         self.assertEqual(root.get_encoding(), "UTF-8")
-        root.set(b"C", "£".encode('utf-8'))
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
-        self.assertEqual(root.get_raw(b"C"), "£".encode('utf-8'))
-        self.assertEqual(g1.serialise(), dedent("""\
+        root.set(b"C", u"£".encode('utf-8'))
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(root.get_raw(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(g1.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[UTF-8]GM[1]SZ[19])
         """).encode('utf-8'))
 
@@ -307,8 +307,8 @@ class SgfTestCase(unittest.TestCase):
         self.assertEqual(g2.get_charset(), "ISO-8859-1")
         root = g2.get_root()
         self.assertEqual(root.get_encoding(), "ISO-8859-1")
-        root.set(b"C", "£".encode('utf-8'))
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
+        root.set(b"C", u"£".encode('utf-8'))
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
         self.assertEqual(root.get_raw(b"C"), b"\xa3")
         self.assertEqual(g2.serialise(), b"(;FF[4]C[\xa3]CA[ISO-8859-1]GM[1]SZ[19])\n")
 
@@ -316,15 +316,15 @@ class SgfTestCase(unittest.TestCase):
                                 gosgf.Sgf_game, 19, "unknownencoding")
 
     def test_loaded_sgf_game_encoding(self):
-        g1 = gosgf.Sgf_game.from_string("""
+        g1 = gosgf.Sgf_game.from_string(u"""
         (;FF[4]C[£]CA[utf-8]GM[1]SZ[19])
         """.encode('utf-8'))
         self.assertEqual(g1.get_charset(), "UTF-8")
         root = g1.get_root()
         self.assertEqual(root.get_encoding(), "UTF-8")
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
-        self.assertEqual(root.get_raw(b"C"), "£".encode('utf-8'))
-        self.assertEqual(g1.serialise(), dedent("""\
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(root.get_raw(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(g1.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[utf-8]GM[1]SZ[19])
         """).encode('utf-8'))
 
@@ -334,9 +334,9 @@ class SgfTestCase(unittest.TestCase):
         self.assertEqual(g2.get_charset(), "ISO-8859-1")
         root = g2.get_root()
         self.assertEqual(root.get_encoding(), "ISO-8859-1")
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
         self.assertEqual(root.get_raw(b"C"), b"\xa3")
-        self.assertEqual(g2.serialise(), dedent("""\
+        self.assertEqual(g2.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[iso-8859-1]GM[1]SZ[19])
         """).encode('iso-8859-1'))
 
@@ -346,9 +346,9 @@ class SgfTestCase(unittest.TestCase):
         self.assertEqual(g3.get_charset(), "ISO-8859-1")
         root = g3.get_root()
         self.assertEqual(root.get_encoding(), "ISO-8859-1")
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
         self.assertEqual(root.get_raw(b"C"), b"\xa3")
-        self.assertEqual(g3.serialise(), dedent("""\
+        self.assertEqual(g3.serialise(), dedent(u"""\
         (;FF[4]C[£]GM[1]SZ[19])
         """).encode('iso-8859-1'))
 
@@ -370,14 +370,14 @@ class SgfTestCase(unittest.TestCase):
             """)
 
     def test_override_encoding(self):
-        g1 = gosgf.Sgf_game.from_string("""
+        g1 = gosgf.Sgf_game.from_string(u"""
         (;FF[4]C[£]CA[iso-8859-1]GM[1]SZ[19])
         """.encode('utf-8'), override_encoding="utf-8")
         root = g1.get_root()
         self.assertEqual(root.get_encoding(), "UTF-8")
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
-        self.assertEqual(root.get_raw(b"C"), "£".encode('utf-8'))
-        self.assertEqual(g1.serialise(), dedent("""\
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(root.get_raw(b"C"), u"£".encode('utf-8'))
+        self.assertEqual(g1.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[UTF-8]GM[1]SZ[19])
         """).encode('utf-8'))
 
@@ -386,19 +386,19 @@ class SgfTestCase(unittest.TestCase):
         """, override_encoding="iso-8859-1")
         root = g2.get_root()
         self.assertEqual(root.get_encoding(), "ISO-8859-1")
-        self.assertEqual(root.get(b"C"), "£".encode('utf-8'))
+        self.assertEqual(root.get(b"C"), u"£".encode('utf-8'))
         self.assertEqual(root.get_raw(b"C"), b'\xa3')
         self.assertEqual(g2.serialise().strip(), b"""(;FF[4]C[\xa3]CA[ISO-8859-1]GM[1]SZ[19])""")
 
     def test_serialise_transcoding(self):
-        g1 = gosgf.Sgf_game.from_string("""
+        g1 = gosgf.Sgf_game.from_string(u"""
         (;FF[4]C[£]CA[utf-8]GM[1]SZ[19])
         """.encode('utf-8'))
-        self.assertEqual(g1.serialise(), dedent("""\
+        self.assertEqual(g1.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[utf-8]GM[1]SZ[19])
         """).encode('utf-8'))
         g1.get_root().set(b"CA", b"latin-1")
-        self.assertEqual(g1.serialise(), dedent("""\
+        self.assertEqual(g1.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[latin-1]GM[1]SZ[19])
         """).encode('latin-1'))
         g1.get_root().set(b"CA", b"unknown")
@@ -406,16 +406,16 @@ class SgfTestCase(unittest.TestCase):
                                 g1.serialise)
 
         # improperly-encoded from the start
-        g2 = gosgf.Sgf_game.from_string("""
+        g2 = gosgf.Sgf_game.from_string(u"""
         (;FF[4]C[£]CA[ascii]GM[1]SZ[19])
         """.encode('utf-8'))
-        self.assertEqual(g2.serialise(), dedent("""\
+        self.assertEqual(g2.serialise(), dedent(u"""\
         (;FF[4]C[£]CA[ascii]GM[1]SZ[19])
         """).encode('utf-8'))
         g2.get_root().set(b"CA", b"utf-8")
         self.assertRaises(UnicodeDecodeError, g2.serialise)
 
-        g3 = gosgf.Sgf_game.from_string("""
+        g3 = gosgf.Sgf_game.from_string(u"""
         (;FF[4]C[Δ]CA[utf-8]GM[1]SZ[19])
         """.encode('utf-8'))
         g3.get_root().unset(b"CA")
