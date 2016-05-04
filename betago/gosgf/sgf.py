@@ -767,7 +767,7 @@ class Sgf_game(object):
 
         """
         try:
-            handicap = self.root.get("HA")
+            handicap = self.root.get(b"HA")
         except KeyError:
             return None
         if handicap == 0:
