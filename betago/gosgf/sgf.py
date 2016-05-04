@@ -110,7 +110,8 @@ class Node(object):
 
 
     def _set_raw_list(self, identifier, values):
-        if identifier == "SZ" and values != [str(self._presenter.size)]:
+        if identifier == b"SZ" and \
+                values != [str(self._presenter.size).encode(self._presenter.encoding)]:
             raise ValueError("changing size is not permitted")
         self._property_map[identifier] = values
 
@@ -120,7 +121,7 @@ class Node(object):
         Raises KeyError if the property isn't currently present.
 
         """
-        if identifier == "SZ" and self._presenter.size != 19:
+        if identifier == b"SZ" and self._presenter.size != 19:
             raise ValueError("changing size is not permitted")
         del self._property_map[identifier]
 
@@ -210,11 +211,11 @@ class Node(object):
         Returns None, None if the node contains no B or W property.
 
         """
-        values = self._property_map.get("B")
+        values = self._property_map.get(b"B")
         if values is not None:
             colour = "b"
         else:
-            values = self._property_map.get("W")
+            values = self._property_map.get(b"W")
             if values is not None:
                 colour = "w"
             else:
@@ -248,15 +249,15 @@ class Node(object):
 
         """
         try:
-            bp = self.get("AB")
+            bp = self.get(b"AB")
         except KeyError:
             bp = set()
         try:
-            wp = self.get("AW")
+            wp = self.get(b"AW")
         except KeyError:
             wp = set()
         try:
-            ep = self.get("AE")
+            ep = self.get(b"AE")
         except KeyError:
             ep = set()
         return bp, wp, ep
@@ -264,7 +265,7 @@ class Node(object):
     def has_setup_stones(self):
         """Check whether the node has any AB/AW/AE properties."""
         d = self._property_map
-        return ("AB" in d or "AW" in d or "AE" in d)
+        return (b"AB" in d or b"AW" in d or b"AE" in d)
 
     def set_move(self, colour, move):
         """Set the B or W property.
@@ -277,11 +278,11 @@ class Node(object):
         """
         if colour not in ('b', 'w'):
             raise ValueError
-        if 'B' in self._property_map:
-            del self._property_map['B']
-        if 'W' in self._property_map:
-            del self._property_map['W']
-        self.set(colour.upper(), move)
+        if b'B' in self._property_map:
+            del self._property_map[b'B']
+        if b'W' in self._property_map:
+            del self._property_map[b'W']
+        self.set(colour.upper().encode('ascii'), move)
 
     def set_setup_stones(self, black, white, empty=None):
         """Set Add Black / Add White / Add Empty properties.
@@ -291,18 +292,18 @@ class Node(object):
         Removes any existing AB/AW/AE properties from the node.
 
         """
-        if 'AB' in self._property_map:
-            del self._property_map['AB']
-        if 'AW' in self._property_map:
-            del self._property_map['AW']
-        if 'AE' in self._property_map:
-            del self._property_map['AE']
+        if b'AB' in self._property_map:
+            del self._property_map[b'AB']
+        if b'AW' in self._property_map:
+            del self._property_map[b'AW']
+        if b'AE' in self._property_map:
+            del self._property_map[b'AE']
         if black:
-            self.set('AB', black)
+            self.set(b'AB', black)
         if white:
-            self.set('AW', white)
+            self.set(b'AW', white)
         if empty:
-            self.set('AE', empty)
+            self.set(b'AE', empty)
 
     def add_comment_text(self, text):
         """Add or extend the node's comment.
@@ -314,14 +315,16 @@ class Node(object):
         (with two newlines in front).
 
         """
-        if self.has_property('C'):
-            self.set('C', self.get('C') + "\n\n" + text)
+        if self.has_property(b'C'):
+            self.set(b'C', self.get(b'C') + b"\n\n" + text)
         else:
-            self.set('C', text)
+            self.set(b'C', text)
 
     def __str__(self):
+        encoding = self.get_encoding()
         def format_property(ident, values):
-            return ident + "".join("[%s]" % s for s in values)
+            return ident.decode(encoding) + "".join(
+                "[%s]" % s.decode(encoding) for s in values)
         return "\n".join(
             format_property(ident, values)
             for (ident, values) in sorted(self._property_map.items())) \
@@ -524,11 +527,11 @@ class Sgf_game(object):
 
     def __init__(self, *args, **kwargs):
         self.root = _Root_tree_node({}, self)
-        self.root.set_raw('FF', "4")
-        self.root.set_raw('GM', "1")
-        self.root.set_raw('SZ', str(self.size))
+        self.root.set_raw(b'FF', b"4")
+        self.root.set_raw(b'GM', b"1")
+        self.root.set_raw(b'SZ', str(self.size).encode(self.presenter.encoding))
         # Read the encoding back so we get the normalised form
-        self.root.set_raw('CA', self.presenter.encoding)
+        self.root.set_raw(b'CA', self.presenter.encoding.encode('ascii'))
 
     @classmethod
     def from_coarse_game_tree(cls, coarse_game, override_encoding=None):
@@ -550,7 +553,7 @@ class Sgf_game(object):
 
         """
         try:
-            size_s = coarse_game.sequence[0]['SZ'][0]
+            size_s = coarse_game.sequence[0][b'SZ'][0]
         except KeyError:
             size = 19
         else:
@@ -560,15 +563,15 @@ class Sgf_game(object):
                 raise ValueError("bad SZ property: %s" % size_s)
         if override_encoding is None:
             try:
-                encoding = coarse_game.sequence[0]['CA'][0]
+                encoding = coarse_game.sequence[0][b'CA'][0]
             except KeyError:
-                encoding = "ISO-8859-1"
+                encoding = b"ISO-8859-1"
         else:
             encoding = override_encoding
         game = cls.__new__(cls, size, encoding)
         game.root = _Unexpanded_root_tree_node(game, coarse_game)
         if override_encoding is not None:
-            game.root.set_raw("CA", game.presenter.encoding)
+            game.root.set_raw(b"CA", game.presenter.encoding.encode('ascii'))
         return game
 
     @classmethod
@@ -613,8 +616,8 @@ class Sgf_game(object):
         try:
             encoding = self.get_charset()
         except ValueError:
-            raise ValueError("unsupported charset: %s" %
-                             self.root.get_raw_list("CA"))
+            raise ValueError("unsupported charset: %r" %
+                             self.root.get_raw_list(b"CA"))
         coarse_tree = sgf_grammar.make_coarse_game_tree(
             self.root, lambda node:node, Node.get_raw_property_map)
         serialised = sgf_grammar.serialise_game_tree(coarse_tree, wrap)
@@ -733,7 +736,7 @@ class Sgf_game(object):
 
         """
         try:
-            s = self.root.get("CA")
+            s = self.root.get(b"CA")
         except KeyError:
             return "ISO-8859-1"
         try:
@@ -750,7 +753,7 @@ class Sgf_game(object):
 
         """
         try:
-            return self.root.get("KM")
+            return self.root.get(b"KM")
         except KeyError:
             return 0.0
 
@@ -780,7 +783,8 @@ class Sgf_game(object):
 
         """
         try:
-            return self.root.get({'b' : 'PB', 'w' : 'PW'}[colour])
+            return self.root.get(
+                {'b' : b'PB', 'w' : b'PW'}[colour]).decode(self.presenter.encoding)
         except KeyError:
             return None
 
@@ -791,7 +795,7 @@ class Sgf_game(object):
 
         """
         try:
-            colour = self.root.get("RE")[0].lower()
+            colour = self.root.get(b"RE").decode(self.presenter.encoding)[0].lower()
         except LookupError:
             return None
         if colour not in ("b", "w"):

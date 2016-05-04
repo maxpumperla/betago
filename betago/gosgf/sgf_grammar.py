@@ -24,10 +24,10 @@ import re
 import string
 
 
-_propident_re = re.compile(r"\A[A-Z]{1,8}\Z")
-_propvalue_re = re.compile(r"\A [^\\\]]* (?: \\. [^\\\]]* )* \Z",
+_propident_re = re.compile(r"\A[A-Z]{1,8}\Z".encode('ascii'))
+_propvalue_re = re.compile(r"\A [^\\\]]* (?: \\. [^\\\]]* )* \Z".encode('ascii'),
                            re.VERBOSE | re.DOTALL)
-_find_start_re = re.compile(r"\(\s*;")
+_find_start_re = re.compile(r"\(\s*;".encode('ascii'))
 _tokenise_re = re.compile(r"""
 \s*
 (?:
@@ -37,7 +37,7 @@ _tokenise_re = re.compile(r"""
     |
     (?P<D> [;()] )                                # delimiter
 )
-""", re.VERBOSE | re.DOTALL)
+""".encode('ascii'), re.VERBOSE | re.DOTALL)
 
 
 def is_valid_property_identifier(s):
@@ -105,9 +105,9 @@ def tokenise(s, start_position=0):
         result.append((group, token))
         i = m.end()
         if group == 'D':
-            if token == '(':
+            if token == b'(':
                 depth += 1
-            elif token == ')':
+            elif token == b')':
                 depth -= 1
                 if depth == 0:
                     break
@@ -148,7 +148,7 @@ def _parse_sgf_game(s, start_position):
             if token_type == 'V':
                 raise ValueError("unexpected value")
             if token_type == 'D':
-                if token == ';':
+                if token == b';':
                     if sequence is None:
                         raise ValueError("unexpected node")
                     properties = {}
@@ -159,7 +159,7 @@ def _parse_sgf_game(s, start_position):
                             raise ValueError("empty sequence")
                         game_tree.sequence = sequence
                         sequence = None
-                    if token == '(':
+                    if token == b'(':
                         stack.append(game_tree)
                         game_tree = Coarse_game_tree()
                         sequence = []
@@ -243,7 +243,7 @@ def parse_sgf_collection(s):
     while True:
         try:
             game_tree, position = _parse_sgf_game(s, position)
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError("error parsing game %d: %s" % (len(result), e))
         if game_tree is None:
             break
@@ -254,7 +254,7 @@ def parse_sgf_collection(s):
 
 
 def block_format(pieces, width=79):
-    """Concatenate strings, adding newlines.
+    """Concatenate bytestrings, adding newlines.
 
     pieces -- iterable of strings
     width  -- int (default 79)
@@ -268,15 +268,15 @@ def block_format(pieces, width=79):
 
     """
     lines = []
-    line = ""
+    line = b""
     for s in pieces:
         if len(line) + len(s) > width:
             lines.append(line)
-            line = ""
+            line = b""
         line += s
     if line:
         lines.append(line)
-    return "\n".join(lines)
+    return b"\n".join(lines)
 
 def serialise_game_tree(game_tree, wrap=79):
     """Serialise an SGF game as a string.
@@ -295,27 +295,27 @@ def serialise_game_tree(game_tree, wrap=79):
     while to_serialise:
         game_tree = to_serialise.pop()
         if game_tree is None:
-            l.append(")")
+            l.append(b")")
             continue
-        l.append("(")
+        l.append(b"(")
         for properties in game_tree.sequence:
-            l.append(";")
+            l.append(b";")
             # Force FF to the front, largely to work around a Quarry bug which
             # makes it ignore the first few bytes of the file.
             for prop_ident, prop_values in sorted(
-                    properties.iteritems(),
-                    key=lambda (ident, _,): (-(ident=="FF"), ident)):
+                    properties.items(),
+                    key=lambda pair: (-(pair[0]==b"FF"), pair[0])):
                 # Make a single string for each property, to get prettier
                 # block_format output.
                 m = [prop_ident]
                 for value in prop_values:
-                    m.append("[%s]" % value)
-                l.append("".join(m))
+                    m.append(b"[%s]" % value)
+                l.append(b"".join(m))
         to_serialise.append(None)
         to_serialise.extend(reversed(game_tree.children))
-    l.append("\n")
+    l.append(b"\n")
     if wrap is None:
-        return "".join(l)
+        return b"".join(l)
     else:
         return block_format(l, wrap)
 
@@ -404,7 +404,7 @@ def main_sequence_iter(game_tree):
 
 
 _split_compose_re = re.compile(
-    r"( (?: [^\\:] | \\. )* ) :",
+    r"( (?: [^\\:] | \\. )* ) :".encode('ascii'),
     re.VERBOSE | re.DOTALL)
 
 def parse_compose(s):
@@ -432,12 +432,12 @@ def compose(s1, s2):
     (This is only needed if the type of the first value permits colons.)
 
     """
-    return s1.replace(":", "\\:") + ":" + s2
+    return s1.replace(b":", b"\\:") + b":" + s2
 
 
-_newline_re = re.compile(r"\n\r|\r\n|\n|\r")
-_whitespace_table = string.maketrans("\t\f\v", "   ")
-_chunk_re = re.compile(r" [^\n\\]+ | [\n\\] ", re.VERBOSE)
+_newline_re = re.compile(r"\n\r|\r\n|\n|\r".encode('ascii'))
+_whitespace_table = bytes.maketrans(b"\t\f\v", b"   ")
+_chunk_re = re.compile(r" [^\n\\]+ | [\n\\] ".encode('ascii'), re.VERBOSE)
 
 def simpletext_value(s):
     """Convert a raw SimpleText property value to the string it represents.
@@ -452,22 +452,22 @@ def simpletext_value(s):
     - other backslashes disappear (but double-backslash -> single-backslash)
 
     """
-    s = _newline_re.sub("\n", s)
+    s = _newline_re.sub(b"\n", s)
     s = s.translate(_whitespace_table)
     is_escaped = False
     result = []
     for chunk in _chunk_re.findall(s):
         if is_escaped:
-            if chunk != "\n":
+            if chunk != b"\n":
                 result.append(chunk)
             is_escaped = False
-        elif chunk == "\\":
+        elif chunk == b"\\":
             is_escaped = True
-        elif chunk == "\n":
-            result.append(" ")
+        elif chunk == b"\n":
+            result.append(b" ")
         else:
             result.append(chunk)
-    return "".join(result)
+    return b"".join(result)
 
 def text_value(s):
     """Convert a raw Text property value to the string it represents.
@@ -482,20 +482,20 @@ def text_value(s):
     - other backslashes disappear (but double-backslash -> single-backslash)
 
     """
-    s = _newline_re.sub("\n", s)
+    s = _newline_re.sub(b"\n", s)
     s = s.translate(_whitespace_table)
     is_escaped = False
     result = []
     for chunk in _chunk_re.findall(s):
         if is_escaped:
-            if chunk != "\n":
+            if chunk != b"\n":
                 result.append(chunk)
             is_escaped = False
-        elif chunk == "\\":
+        elif chunk == b"\\":
             is_escaped = True
         else:
             result.append(chunk)
-    return "".join(result)
+    return b"".join(result)
 
 def escape_text(s):
     """Convert a string to a raw Text property value that represents it.
@@ -510,5 +510,5 @@ def escape_text(s):
      - whitespace other than line breaks is converted to a single space
 
     """
-    return s.replace("\\", "\\\\").replace("]", "\\]")
+    return s.replace(b"\\", b"\\\\").replace(b"]", b"\\]")
 
