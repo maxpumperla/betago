@@ -518,7 +518,7 @@ class SgfTestCase(unittest.TestCase):
     def test_extend_main_sequence(self):
         g1 = gosgf.Sgf_game(9)
         for i in range(6):
-            g1.extend_main_sequence().set(b"N", b"e%d" % i)
+            g1.extend_main_sequence().set(b"N", ("e%d" % i).encode('ascii'))
         self.assertEqual(
             g1.serialise(),
             b"(;FF[4]CA[UTF-8]GM[1]SZ[9];N[e0];N[e1];N[e2];N[e3];N[e4];N[e5])\n")

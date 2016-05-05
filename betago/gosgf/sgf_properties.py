@@ -425,8 +425,7 @@ def serialise_ARLN_list(values, context):
     values -- list of pairs (point, point), where point is a pair (row, col)
 
     """
-    return [b"%s:%s" % (serialise_point(p1, context),
-                        serialise_point(p2, context))
+    return [b":".join((serialise_point(p1, context), serialise_point(p2, context)))
             for p1, p2 in values]
 
 
@@ -456,7 +455,7 @@ def serialise_FG(value, context):
     if value is None:
         return b""
     flags, name = value
-    return b"%d:%s" % (flags, serialise_simpletext(name, context))
+    return str(flags).encode('ascii') + b":" + serialise_simpletext(name, context)
 
 
 def interpret_LB_list(values, context):
@@ -478,8 +477,7 @@ def serialise_LB_list(values, context):
     values -- list of pairs ((row, col), string)
 
     """
-    return [b"%s:%s" % (serialise_point(point, context),
-                        serialise_simpletext(text, context))
+    return [b":".join((serialise_point(point, context), serialise_simpletext(text, context)))
             for point, text in values]
 
 

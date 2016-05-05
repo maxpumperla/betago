@@ -311,7 +311,7 @@ def serialise_game_tree(game_tree, wrap=79):
                 # block_format output.
                 m = [prop_ident]
                 for value in prop_values:
-                    m.append(b"[%s]" % value)
+                    m.append(b"[" + value + b"]")
                 l.append(b"".join(m))
         to_serialise.append(None)
         to_serialise.extend(reversed(game_tree.children))
