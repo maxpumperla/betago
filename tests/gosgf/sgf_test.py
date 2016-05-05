@@ -524,7 +524,7 @@ class SgfTestCase(unittest.TestCase):
             b"(;FF[4]CA[UTF-8]GM[1]SZ[9];N[e0];N[e1];N[e2];N[e3];N[e4];N[e5])\n")
         g2 = gosgf.Sgf_game.from_string(b"(;SZ[9](;N[n1];N[n3])(;N[n2]))")
         for i in range(6):
-            g2.extend_main_sequence().set(b"N", b"e%d" % i)
+            g2.extend_main_sequence().set(b"N", ("e%d" % i).encode('ascii'))
         self.assertEqual(
             g2.serialise(),
             b"(;SZ[9](;N[n1];N[n3];N[e0];N[e1];N[e2];N[e3];N[e4];N[e5])(;N[n2]))\n")
