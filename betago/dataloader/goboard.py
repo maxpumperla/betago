@@ -131,7 +131,7 @@ class GoBoard(object):
             return
         enemy_string = self.go_strings[enemy_pos]
         if enemy_string is None:
-            raise('check_string is None')
+            raise ValueError('Inconsistency between board and go_strings at %r' % enemy_pos)
 
         # Update adjacent liberties on board
         enemy_string.remove_liberty(our_pos)
@@ -154,7 +154,7 @@ class GoBoard(object):
         pos: Current move as (row, col)
         '''
         if pos in self.board:
-            raise('>>> Error: move ' + str(pos) + 'is already on board.')
+            raise ValueError('Move ' + str(pos) + 'is already on board.')
 
         self.ko_last_move_num_captured = 0
         row, col = pos
