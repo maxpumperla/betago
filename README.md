@@ -13,7 +13,7 @@ Test BetaGo by running the following commands. It should start a playable demo i
 
 #### Ubuntu/Debian
 ```{bash}
-sudo apt-get install -y python-dev python-pip python-virtualenv gfortran libhdf5-dev pkg-config
+sudo apt-get install -y python-dev python-pip python-virtualenv gfortran libhdf5-dev pkg-config liblapack-dev libblas-dev
 ```
 #### Mac
 On a Mac we recommend using homebrew to install HDF5 first 
@@ -26,6 +26,7 @@ brew install hdf5
 ```
 virtualenv .betago
 . .betago/bin/activate
+pip install --upgrade pip setuptools
 pip install betago
 git clone https://github.com/maxpumperla/betago
 cd betago
