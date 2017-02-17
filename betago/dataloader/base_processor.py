@@ -6,7 +6,7 @@ import os
 import gc
 import glob
 import os.path
-import zipfile
+import tarfile
 import numpy as np
 import argparse
 import multiprocessing
@@ -45,7 +45,7 @@ class DataGenerator(object):
 
     def _generate(self, batch_size, nb_classes):
         for zip_file_name in self.files:
-            file_name = zip_file_name.replace('.zip', '') + 'train'
+            file_name = zip_file_name.replace('.tar.gz', '') + 'train'
             base = self.data_dir + '/' + file_name + '_features_*.npy'
             for feature_file in glob.glob(base):
                 label_file = feature_file.replace('features', 'labels')
@@ -272,7 +272,7 @@ class GoDataProcessor(GoBaseProcessor):
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
         # Read zipped file and extract name list
-        this_zip = zipfile.ZipFile(dir_name + '/' + zip_file_name)
+        this_zip = tarfile.TarFile(dir_name + '/' + zip_file_name)
         name_list = this_zip.namelist()
 
         # Determine number of examples
@@ -387,7 +387,7 @@ class GoFileProcessor(GoBaseProcessor):
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
         # Read zipped file and extract name list
-        this_zip = zipfile.ZipFile(dir_name + '/' + zip_file_name)
+        this_zip = tarfile.TarFile(dir_name + '/' + zip_file_name)
         name_list = this_zip.namelist()
 
         # Determine number of examples
