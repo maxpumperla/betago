@@ -7,6 +7,8 @@ import gc
 import glob
 import os.path
 import tarfile
+import gzip
+import shutil
 import numpy as np
 import argparse
 import multiprocessing
@@ -205,7 +207,7 @@ class GoBaseProcessor(object):
         # Transform the above dictionary to a list that can be processed in parallel
         zips_to_process = []
         for zip_name in zip_names:
-            base_name = zip_name.replace('.zip', '')
+            base_name = zip_name.replace('.tar.gz', '')
             data_file_name = base_name + name
             if not os.path.isfile(self.data_dir + '/' + data_file_name):
                 zips_to_process.append((self.__class__, self.data_dir, self.num_planes, zip_name,
@@ -235,7 +237,7 @@ class GoBaseProcessor(object):
         for index in game_list:
             name = name_list[index + 1]
             if name.endswith('.sgf'):
-                content = this_zip.read(name)
+                content = this_zip.extractfile(name).read()
                 sgf, go_board_no_handy = self.init_go_board(content)
                 go_board, first_move_done = self.get_handicap(go_board_no_handy, sgf)
 
@@ -272,8 +274,13 @@ class GoDataProcessor(GoBaseProcessor):
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
         # Read zipped file and extract name list
-        this_zip = tarfile.TarFile(dir_name + '/' + zip_file_name)
-        name_list = this_zip.namelist()
+        this_gz = gzip.open(dir_name + '/' + zip_file_name)
+        this_tar_file = zip_file_name[0:-3]
+        this_tar = open(dir_name + '/' + this_tar_file, 'wb')
+        shutil.copyfileobj(this_gz, this_tar)  # random access needed to tar
+        this_tar.close()
+        this_zip = tarfile.open(dir_name + '/' + this_tar_file)
+        name_list = this_zip.getnames()
 
         # Determine number of examples
         total_examples = self.num_total_examples(this_zip, game_list, name_list)
@@ -289,7 +296,7 @@ class GoDataProcessor(GoBaseProcessor):
                 Load Go board and determine handicap of game, then iterate through all moves,
                 store preprocessed move in data_file and apply move to board.
                 '''
-                sgf_content = this_zip.read(name)
+                sgf_content = this_zip.extractfile(name).read()
                 sgf, go_board_no_handy = self.init_go_board(sgf_content)
                 go_board, first_move_done = self.get_handicap(go_board_no_handy, sgf)
                 for item in sgf.main_sequence_iter():
@@ -334,17 +341,23 @@ class GoDataProcessor(GoBaseProcessor):
 
         file_names = []
         for zip_file_name in files_needed:
-            file_name = zip_file_name.replace('.zip', '') + name
+            file_name = zip_file_name.replace('.tar.gz', '') + name
             file_names.append(file_name)
 
         feature_list = []
         label_list = []
+        print(file_names)
         for file_name in file_names:
-            X = np.load(self.data_dir + '/' + file_name + '_features.npy')
-            y = np.load(self.data_dir + '/' + file_name + '_labels.npy')
-            feature_list.append(X)
-            label_list.append(y)
-            print('>>> Done')
+            file_prefix = file_name.replace('.tar.gz', '')
+            base = self.data_dir + '/' + file_prefix + '_features_*.npy'
+            print(base)
+            for feature_file in glob.glob(base):
+                print(feature_file)
+                X = np.load(feature_file)
+                y = np.load(feature_file)
+                feature_list.append(X)
+                label_list.append(y)
+        print('>>> Done')
 
         features = np.concatenate(feature_list, axis=0)
         labels = np.concatenate(label_list, axis=0)
@@ -387,8 +400,13 @@ class GoFileProcessor(GoBaseProcessor):
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
         # Read zipped file and extract name list
-        this_zip = tarfile.TarFile(dir_name + '/' + zip_file_name)
-        name_list = this_zip.namelist()
+        this_gz = gzip.open(dir_name + '/' + zip_file_name)
+        this_tar_file = zip_file_name[0:-3]
+        this_tar = open(dir_name + '/' + this_tar_file, 'wb')
+        shutil.copyfileobj(this_gz, this_tar)  # random access needed to tar
+        this_tar.close()
+        this_zip = tarfile.open(dir_name + '/' + this_tar_file)
+        name_list = this_zip.getnames()
 
         # Determine number of examples
         total_examples = self.num_total_examples(this_zip, game_list, name_list)
@@ -406,7 +424,7 @@ class GoFileProcessor(GoBaseProcessor):
                 Load Go board and determine handicap of game, then iterate through all moves,
                 store preprocessed move in data_file and apply move to board.
                 '''
-                sgf_content = this_zip.read(name)
+                sgf_content = this_zip.extractfile(name).read()
                 sgf, go_board_no_handy = self.init_go_board(sgf_content)
                 go_board, first_move_done = self.get_handicap(go_board_no_handy, sgf)
                 move_idx = 0
@@ -437,7 +455,7 @@ class GoFileProcessor(GoBaseProcessor):
         # Collect names of data files
         data_file_names = []
         for zip_file_name in files_needed:
-            data_file_name = zip_file_name.replace('.zip', '') + name
+            data_file_name = zip_file_name.replace('.tar.gz', '') + name
             data_file_names.append(data_file_name)
 
         # Count total number of moves
