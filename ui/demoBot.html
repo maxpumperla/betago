@@ -84,7 +84,7 @@ jsetup.create('board', function(canvas) {
 
 
     var botcoord;
-    postMove("//" + window.location.host+':5000/prediction', coord,
+    postMove("//" + window.location.host+':8081/prediction', coord,
       function(data) {botcoord = JSON.parse(data)
       });
     coord.i = botcoord.i
