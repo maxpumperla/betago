@@ -48,9 +48,9 @@ class HTTPFrontend(object):
             content = request.json
             row = content['i']
             col = content['j']
-            self.bot.apply_move('w', (row, col))
+            self.bot.apply_move('b', (row, col))
 
-            bot_row, bot_col = self.bot.select_move('b')
+            bot_row, bot_col = self.bot.select_move('w')
             print('Prediction:')
             print(bot_row, bot_col)
             result = {'i': bot_row, 'j': bot_col}

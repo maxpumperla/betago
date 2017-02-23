@@ -19,7 +19,7 @@
 <script type="text/javascript">
 var jboard = new JGO.Board(19);
 var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
-var player = JGO.WHITE; // next player
+var player = JGO.BLACK; // next player
 var ko = false, lastMove = false; // ko coordinate and last move coordinate
 var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
 
@@ -79,7 +79,7 @@ jsetup.create('board', function(canvas) {
         jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = play.ko;
 
-      player = JGO.BLACK;
+      player = JGO.WHITE;
     } else alert('Illegal move A: ' + play.errorMsg);
 
 
@@ -109,7 +109,7 @@ jsetup.create('board', function(canvas) {
       ko = playNext.ko;
 
       console.log(player)
-      player = JGO.WHITE;
+      player = JGO.BLACK;
   } else alert('Illegal move: ' + play.errorMsg);
 
   console.log("played black move")
