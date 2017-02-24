@@ -84,8 +84,10 @@ jsetup.create('board', function(canvas) {
 
 
     var botcoord;
-    postMove("//" + window.location.host+':8081/prediction', coord,
-      function(data) {botcoord = JSON.parse(data)
+    var port = window.location.port;
+    var host = window.location.host;
+    postMove("//" + host + (port=="8081" ? "" : ":8081") + "/prediction", coord,
+      function(data) {botcoord = JSON.parse(data);
       });
     coord.i = botcoord.i
     coord.j = botcoord.j

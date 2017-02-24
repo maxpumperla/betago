@@ -35,9 +35,17 @@ class HTTPFrontend(object):
         CORS(app, resources={r"/prediction/*": {"origins": "*"}})
         self.app = app
 
+        @app.route('/dist/<path:path>')
+        def static_file_dist(path):
+            return open("ui/dist/" + path).read()
+
+        @app.route('/large/<path:path>')
+        def static_file_large(path):
+            return open("ui/large/" + path).read()
+
         @app.route('/')
         def home():
-            return 'betago'
+            return open("ui/demoBot.html").read()
 
         @app.route('/prediction', methods=['GET', 'POST'])
         def next_move():
