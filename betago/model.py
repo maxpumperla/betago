@@ -66,7 +66,7 @@ class HTTPFrontend(object):
             json_result = jsonify(**result)
             return json_result
 
-        self.app.run(host='0.0.0.0', port=self.port, debug=True, threaded=True, use_reloader=False)
+        self.app.run(host='0.0.0.0', port=self.port, debug=True, use_reloader=False)
 
 
 class GoModel(object):
