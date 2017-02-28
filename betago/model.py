@@ -13,7 +13,7 @@ from .processor import ThreePlaneProcessor
 
 class HTTPFrontend(object):
     '''
-    HTTPFrontend is a simple Flask app served on localhost:5000, exposing a REST API to predict
+    HTTPFrontend is a simple Flask app served on localhost:8080, exposing a REST API to predict
     go moves.
     '''
     def __init__(self, bot):
@@ -35,9 +35,17 @@ class HTTPFrontend(object):
         CORS(app, resources={r"/prediction/*": {"origins": "*"}})
         self.app = app
 
+        @app.route('/dist/<path:path>')
+        def static_file_dist(path):
+            return open("ui/dist/" + path).read()
+
+        @app.route('/large/<path:path>')
+        def static_file_large(path):
+            return open("ui/large/" + path).read()
+
         @app.route('/')
         def home():
-            return 'betago'
+            return open("ui/demoBot.html").read()
 
         @app.route('/prediction', methods=['GET', 'POST'])
         def next_move():
@@ -57,7 +65,7 @@ class HTTPFrontend(object):
             json_result = jsonify(**result)
             return json_result
 
-        self.app.run(host='0.0.0.0', debug=True, threaded=True, use_reloader=False)
+        self.app.run(host='0.0.0.0', port=int('8080'), debug=True, threaded=True, use_reloader=False)
 
 
 class GoModel(object):
