@@ -54,14 +54,16 @@ class HTTPFrontend(object):
             Parses the move and hands the work off to the bot.
             '''
             content = request.json
-            row = content['i']
-            col = content['j']
+            col = content['i']
+            row = content['j']
+            print('Received move:')
+            print(col, row)
             self.bot.apply_move('b', (row, col))
 
             bot_row, bot_col = self.bot.select_move('w')
             print('Prediction:')
-            print(bot_row, bot_col)
-            result = {'i': bot_row, 'j': bot_col}
+            print(bot_col, bot_row)
+            result = {'i': bot_col, 'j': bot_row}
             json_result = jsonify(**result)
             return json_result
 
