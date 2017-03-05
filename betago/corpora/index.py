@@ -1,4 +1,5 @@
 import copy
+import itertools
 import json
 
 from .archive import SGFLocator, find_sgfs, tarball_iterator
@@ -58,7 +59,7 @@ class CorpusIndex(object):
         # Skip to the appropriate move in the current game.
         for _ in range(chunk_start.position):
             next(iterator)
-        return iter(limit(iterator, self.chunk_size))
+        return itertools.islice(iterator, self.chunk_size)
 
     def _generate_examples(self, start):
         """
@@ -86,15 +87,6 @@ class CorpusIndex(object):
         with tarball_iterator(physical_file) as tarball:
             for sgf in tarball:
                 yield sgf
-
-
-def limit(iterator, max_items):
-    count = 0
-    for elem in iterator:
-        yield elem
-        count += 1
-        if count >= max_items:
-            break
 
 
 class Pointer(object):
