@@ -38,6 +38,9 @@ class SGFLocator(object):
     def game_file(self):
         return self.archive_filename
 
+    def __cmp__(self, other):
+        return cmp((self.physical_file, self.game_file), (other.physical_file, other.game_file))
+
     def __str__(self):
         return '%s:%s' % (self.archive_path, self.archive_filename)
 

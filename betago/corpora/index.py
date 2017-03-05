@@ -63,12 +63,12 @@ class CorpusIndex(object):
     def _generate_examples(self, start):
         """
         Args:
-            start (SGFLocation)
+            start (SGFLocator)
         """
         start_file_idx = self.physical_files.index(start.physical_file)
-        for i, physical_file in enumerate(self.physical_files[start_file_idx:]):
+        for physical_file in self.physical_files[start_file_idx:]:
             for sgf in self._generate_games(physical_file):
-                if i == 0 and sgf.locator.game_file < start.game_file:
+                if sgf.locator < start:
                     continue
                 game_record = Sgf_game.from_string(sgf.contents)
                 board = GoBoard(19)
