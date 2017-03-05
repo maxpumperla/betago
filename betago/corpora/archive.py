@@ -25,6 +25,7 @@ class SGF(object):
 
 
 class SGFLocator(object):
+    # TODO Support zips and physical SGFs.
     def __init__(self, archive_path, archive_filename):
         self.archive_path = archive_path
         self.archive_filename = archive_filename
@@ -32,6 +33,10 @@ class SGFLocator(object):
     @property
     def physical_file(self):
         return self.archive_path
+
+    @property
+    def game_file(self):
+        return self.archive_filename
 
     def __str__(self):
         return '%s:%s' % (self.archive_path, self.archive_filename)
@@ -80,7 +85,7 @@ def _walk_dir(path):
 
 
 @contextmanager
-def _tarball_iterator(tarball_path):
+def tarball_iterator(tarball_path):
     tempdir = tempfile.mkdtemp(prefix='tmp-betago')
     tf = tarfile.open(tarball_path)
 
@@ -103,6 +108,6 @@ def _tarball_iterator(tarball_path):
 
 
 def _walk_tarball(path):
-    with _tarball_iterator(path) as tarball:
+    with tarball_iterator(path) as tarball:
         for sgf in tarball:
             yield sgf

@@ -1,6 +1,8 @@
+import copy
 import json
 
-from .archive import SGFLocator, find_sgfs
+from .archive import SGFLocator, find_sgfs, tarball_iterator
+from ..dataloader.goboard import GoBoard
 from ..gosgf import Sgf_game
 
 __all__ = [
@@ -9,6 +11,20 @@ __all__ = [
     'load_index',
     'store_index',
 ]
+
+
+def _sequence(game_record):
+    """Extract game moves from a game record.
+
+    The main sequence includes lots of stuff that is not actual game
+    moves.
+    """
+    seq = []
+    for item in game_record.get_main_sequence():
+        color, move = item.get_move()
+        if color is not None:
+            seq.append((color, move))
+    return seq
 
 
 class CorpusIndex(object):
@@ -34,6 +50,47 @@ class CorpusIndex(object):
             serialized['physical_files'],
             serialized['chunk_size'],
             [Pointer.deserialize(raw_boundary) for raw_boundary in serialized['boundaries']])
+
+    def get_chunk(self, chunk_number):
+        assert 0 <= chunk_number < self.num_chunks
+        chunk_start = self.boundaries[chunk_number]
+        iterator = iter(self._generate_examples(chunk_start.locator))
+        # Skip to the appropriate move in the current game.
+        for _ in range(chunk_start.position):
+            next(iterator)
+        return iter(limit(iterator, self.chunk_size))
+
+    def _generate_examples(self, start):
+        """
+        Args:
+            start (SGFLocation)
+        """
+        start_file_idx = self.physical_files.index(start.physical_file)
+        for i, physical_file in enumerate(self.physical_files[start_file_idx:]):
+            for sgf in self._generate_games(physical_file):
+                if i == 0 and sgf.locator.game_file < start.game_file:
+                    continue
+                # TODO Need to apply handicap.
+                game_record = Sgf_game.from_string(sgf.contents)
+                board = GoBoard(19)
+                for i, (color, move) in enumerate(_sequence(game_record)):
+                    yield copy.deepcopy(board), color, move
+                    if move is not None:
+                        board.apply_move(color, move)
+
+    def _generate_games(self, physical_file):
+        with tarball_iterator(physical_file) as tarball:
+            for sgf in tarball:
+                yield sgf
+
+
+def limit(iterator, max_items):
+    count = 0
+    for elem in iterator:
+        yield elem
+        count += 1
+        if count >= max_items:
+            break
 
 
 class Pointer(object):
@@ -74,7 +131,7 @@ def build_index(path, chunk_size):
             boundaries.append(Pointer(sgf.locator, 0))
             examples_needed = chunk_size
         game_record = Sgf_game.from_string(sgf.contents)
-        num_positions = len(game_record.get_main_sequence())
+        num_positions = len(_sequence(game_record))
         if examples_needed < num_positions:
             # The start of the next chunk is inside this SGF.
             boundaries.append(Pointer(sgf.locator, examples_needed))

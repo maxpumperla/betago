@@ -2,6 +2,7 @@ import argparse
 
 from betago.corpora import build_index, find_sgfs, load_index, store_index
 from betago.gosgf import Sgf_game
+from betago.dataloader import goboard
 
 
 def index(args):
@@ -13,6 +14,9 @@ def show(args):
     corpus_index = load_index(open(args.file))
     print "Index contains %d chunks in %d physical files" % (
         corpus_index.num_chunks, len(corpus_index.physical_files))
+    chunk_iterator = corpus_index.get_chunk(corpus_index.num_chunks / 2)
+    board, next_color, next_move = next(chunk_iterator)
+    print goboard.to_string(board)
 
 
 def main():
