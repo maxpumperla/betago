@@ -70,9 +70,13 @@ class CorpusIndex(object):
             for sgf in self._generate_games(physical_file):
                 if i == 0 and sgf.locator.game_file < start.game_file:
                     continue
-                # TODO Need to apply handicap.
                 game_record = Sgf_game.from_string(sgf.contents)
                 board = GoBoard(19)
+                # Set up the handicap.
+                if game_record.get_handicap() > 0:
+                    for setup in game_record.get_root().get_setup_stones():
+                        for move in setup:
+                            board.apply_move('b', move)
                 for i, (color, move) in enumerate(_sequence(game_record)):
                     yield copy.deepcopy(board), color, move
                     if move is not None:
