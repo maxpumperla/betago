@@ -45,12 +45,10 @@ def train(args):
     processor = SevenPlaneProcessor()
     xs, ys = [], []
     for board, next_color, next_move in chunk:
-        if next_move is not None:
-            # Can't train on passes atm.
-            feature, label = processor.feature_and_label(next_color, next_move, board,
-                                                         processor.num_planes)
-            xs.append(feature)
-            ys.append(label)
+        feature, label = processor.feature_and_label(next_color, next_move, board,
+                                                     processor.num_planes)
+        xs.append(feature)
+        ys.append(label)
     X = np.array(xs)
     # one-hot encode the moves
     nb_classes = 19 * 19

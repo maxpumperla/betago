@@ -23,7 +23,10 @@ def _sequence(game_record):
     seq = []
     for item in game_record.get_main_sequence():
         color, move = item.get_move()
-        if color is not None:
+        # color == None is entries that are not actual game play
+        # move == None is a pass, which in theory we could try to
+        # predict, but not yet
+        if color is not None and move is not None:
             seq.append((color, move))
     return seq
 
