@@ -83,47 +83,47 @@ jsetup.create('board', function(canvas) {
       ko = play.ko;
 
       player = JGO.WHITE;
+      
+      var botcoord;
+      postMove('/prediction', coord,
+        function(data) {
+          botcoord = JSON.parse(data);
+        });
+      coord.i = botcoord.i
+      coord.j = botcoord.j
+
+      playNext = jboard.playMove(coord, player, ko);
+
+      if (playNext.success) {
+        jboard.setType(coord, player); // play stone
+        jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
+
+        if (lastMove)
+          jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
+        if (ko)
+          jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
+
+        jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
+        lastMove = coord;
+
+        if (playNext.ko)
+          jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
+        ko = playNext.ko;
+
+        // console.log("JGO.WHITE = " + player);
+        player = JGO.BLACK;
+      } else {
+        console.log('Illegal move: ' + play.errorMsg);
+        alert('Illegal move: ' + play.errorMsg);
+      }
+
+      console.log("Recieved move from server:");
+      // console.log("JGO.WHITE = " + player);
+      console.log("(" + coord.i + ", " + coord.j + ")");
     } else {
       console.log('Illegal move: ' + play.errorMsg);
       alert('Illegal move: ' + play.errorMsg);
     }
-
-    var botcoord;
-    postMove('/prediction', coord,
-      function(data) {botcoord = JSON.parse(data);
-      });
-    coord.i = botcoord.i
-    coord.j = botcoord.j
-
-    playNext = jboard.playMove(coord, player, ko);
-
-    if(playNext.success) {
-      jboard.setType(coord, player); // play stone
-      jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
-
-      if(lastMove)
-        jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
-      if(ko)
-        jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
-
-      jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
-      lastMove = coord;
-
-      if(playNext.ko)
-        jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
-      ko = playNext.ko;
-
-      // console.log("JGO.WHITE = " + player);
-      player = JGO.BLACK;
-  } else {
-    console.log('Illegal move: ' + play.errorMsg);
-    alert('Illegal move: ' + play.errorMsg);
-  }
-
-  console.log("Recieved move from server:");
-  // console.log("JGO.WHITE = " + player);
-  console.log("(" + coord.i + ", " + coord.j + ")");
-
   });
 
   canvas.addListener('mousemove', function(coord, ev) {
