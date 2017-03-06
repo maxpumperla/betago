@@ -27,6 +27,7 @@
   <script type="text/javascript" src="dist/jgoboard-latest.js"></script>
   <script type="text/javascript" src="large/board.js"></script>
   <script type="text/javascript">
+    /*global JGO*/
     var jboard = new JGO.Board(19);
     var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
     var player = JGO.BLACK; // next player
@@ -35,6 +36,7 @@
     var lastHover = false,
       lastX = -1,
       lastY = -1; // hover helper vars
+    var playNext;
 
     // Man, do I want to use superagent here. Repeat: add. no. dependencies.
     function postMove(url, data, success) {
@@ -106,8 +108,8 @@
             function(data) {
               botcoord = JSON.parse(data);
             });
-          coord.i = botcoord.i
-          coord.j = botcoord.j
+          coord.i = botcoord.i;
+          coord.j = botcoord.j;
 
           playNext = jboard.playMove(coord, player, ko);
 
