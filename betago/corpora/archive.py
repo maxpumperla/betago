@@ -104,10 +104,12 @@ def tarball_iterator(tarball_path):
                  if tf_entry.isfile and tf_entry.name.endswith('.sgf')]
     sgf_names.sort()
     tf.extractall(tempdir)
-    yield [SGF(SGFLocator(tarball_path, sgf_name), open(os.path.join(tempdir, sgf_name)).read())
-           for sgf_name in sgf_names]
-    shutil.rmtree(tempdir)
-    tf.close()
+    try:
+        yield [SGF(SGFLocator(tarball_path, sgf_name), open(os.path.join(tempdir, sgf_name)).read())
+               for sgf_name in sgf_names]
+    finally:
+        shutil.rmtree(tempdir)
+        tf.close()
 
 
 def _walk_tarball(path):
