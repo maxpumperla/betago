@@ -52,7 +52,7 @@ class TrainingRun(object):
     @classmethod
     def create(cls, filename, index):
         # TODO Take the model architecture as an input.
-        model = _small_model()
+        model = _big_model()
         model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
         training_run = cls(filename, model, 0, 0, index.num_chunks)
         training_run.save()

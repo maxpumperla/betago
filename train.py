@@ -1,5 +1,7 @@
 import argparse
+import multiprocessing
 import os
+import time
 
 import numpy as np
 
@@ -30,6 +32,31 @@ def show(args):
     print goboard.to_string(board)
 
 
+def prepare_training_data(next_chunk, corpus_index, output_q, stop_q):
+    processor = SevenPlaneProcessor()
+
+    while True:
+        chunk = corpus_index.get_chunk(next_chunk)
+        xs, ys = [], []
+        for board, next_color, next_move in chunk:
+            if not stop_q.empty():
+                print "Got stop signal, aborting."
+                return
+            feature, label = processor.feature_and_label(next_color, next_move, board,
+                                                         processor.num_planes)
+            xs.append(feature)
+            ys.append(label)
+        X = np.array(xs)
+        # one-hot encode the moves
+        nb_classes = 19 * 19
+        Y = np.zeros((len(ys), nb_classes))
+        for i, y in enumerate(ys):
+            Y[i][y] = 1
+        output_q.put((X, Y))
+
+        next_chunk = (next_chunk + 1) % corpus_index.num_chunks
+
+
 def train(args):
     corpus_index = load_index(open(args.index))
     print "Index contains %d chunks in %d physical files" % (
@@ -39,30 +66,27 @@ def train(args):
     else:
         run = TrainingRun.load(args.progress)
 
-    next_chunk = run.chunks_completed
-    chunk = corpus_index.get_chunk(next_chunk)
-
-    processor = SevenPlaneProcessor()
-    xs, ys = [], []
-    for board, next_color, next_move in chunk:
-        feature, label = processor.feature_and_label(next_color, next_move, board,
-                                                     processor.num_planes)
-        xs.append(feature)
-        ys.append(label)
-    X = np.array(xs)
-    # one-hot encode the moves
-    nb_classes = 19 * 19
-    Y = np.zeros((len(ys), nb_classes))
-    for i, y in enumerate(ys):
-        Y[i][y] = 1
-
-    print "Training epoch %d chunk %d/%d..." % (
-        run.epochs_completed + 1,
-        run.chunks_completed + 1,
-        run.num_chunks)
-    run.model.fit(X, Y, nb_epoch=1)
-
-    run.complete_chunk()
+    q = multiprocessing.Queue(maxsize=3)
+    stop_q = multiprocessing.Queue()
+    p = multiprocessing.Process(target=prepare_training_data,
+                                args=(run.chunks_completed, corpus_index, q, stop_q))
+    p.start()
+    try:
+        while True:
+            print "Waiting for prepared training chunk..."
+            wait_start_ts = time.time()
+            X, Y = q.get()
+            wait_end_ts = time.time()
+            print "Idle %.1f seconds" % (wait_end_ts - wait_start_ts,)
+            print "Training epoch %d chunk %d/%d..." % (
+                run.epochs_completed + 1,
+                run.chunks_completed + 1,
+                run.num_chunks)
+            run.model.fit(X, Y, nb_epoch=1)
+            run.complete_chunk()
+    finally:
+        stop_q.put(1)
+        p.join()
 
 
 def main():
