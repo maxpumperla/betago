@@ -1,156 +1,177 @@
 <!DOCTYPE HTML>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>BetaGo user interface</title>
   <style>
-  body { text-align: center; }
-  div { margin: 20px auto; color: #888; }
+    body {
+      text-align: center;
+    }
+    
+    div {
+      margin: 20px auto;
+      color: #888;
+    }
   </style>
 </head>
+
 <body>
 
-<h1> BetaGo </h1>
-<div id="board"></div>
-<div><p>Click to play.</p></div>
+  <h1> BetaGo </h1>
+  <div id="board"></div>
+  <div>
+    <p>Click to play.</p>
+  </div>
 
-<script type="text/javascript" src="dist/jgoboard-latest.js"></script>
-<script type="text/javascript" src="large/board.js"></script>
-<script type="text/javascript">
-var jboard = new JGO.Board(19);
-var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
-var player = JGO.BLACK; // next player
-var ko = false, lastMove = false; // ko coordinate and last move coordinate
-var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
+  <script type="text/javascript" src="dist/jgoboard-latest.js"></script>
+  <script type="text/javascript" src="large/board.js"></script>
+  <script type="text/javascript">
+    var jboard = new JGO.Board(19);
+    var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
+    var player = JGO.BLACK; // next player
+    var ko = false,
+      lastMove = false; // ko coordinate and last move coordinate
+    var lastHover = false,
+      lastX = -1,
+      lastY = -1; // hover helper vars
 
-// Man, do I want to use superagent here. Repeat: add. no. dependencies.
-function postMove(url, data, success) {
-    console.log("Sent move to server!");
-    var xmlhttp;
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", url, false);
-    // Note that we force a synchronous call here, bad karma.
-    xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState>3 && xmlhttp.status==200) {
+    // Man, do I want to use superagent here. Repeat: add. no. dependencies.
+    function postMove(url, data, success) {
+      console.log("Sent move to server!");
+      var xmlhttp;
+      xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", url, false);
+      // Note that we force a synchronous call here, bad karma.
+      xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState > 3 && xmlhttp.status == 200) {
           success(xmlhttp.responseText);
-      }
-    };
-    xmlhttp.setRequestHeader("Content-Type", "application/json");
-    xmlhttp.send(JSON.stringify(data));
-    return xmlhttp;
-}
-
-
-jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 0), JGO.BLACK);
-
-jsetup.setOptions({stars: {points:5}});
-jsetup.create('board', function(canvas) {
-
-  canvas.addListener('click', function(coord, ev) {
-    console.log("Attepting human move:");
-    console.log("(" + coord.i + ", " + coord.j + ")");
-    var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
-
-    if(ev.shiftKey) { // on shift do edit
-      if(jboard.getMark(coord) == JGO.MARK.NONE)
-        jboard.setMark(coord, JGO.MARK.SELECTED);
-      else
-        jboard.setMark(coord, JGO.MARK.NONE);
-      return;
+        }
+      };
+      xmlhttp.setRequestHeader("Content-Type", "application/json");
+      xmlhttp.send(JSON.stringify(data));
+      return xmlhttp;
     }
 
-    // clear hover away - it'll be replaced or then it will be an illegal move
-    // in any case so no need to worry about putting it back afterwards
-    if(lastHover)
-      jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
-    lastHover = false;
 
-    var play = jboard.playMove(coord, player, ko);
-    if(play.success) {
-      jboard.setType(coord, player); // play stone
-      jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
+    jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 0), JGO.BLACK);
 
-      if(lastMove)
-        jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
-      if(ko)
-        jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
-
-      jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
-      lastMove = coord;
-
-      if(play.ko)
-        jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
-      ko = play.ko;
-
-      player = JGO.WHITE;
-      
-      var botcoord;
-      postMove('/prediction', coord,
-        function(data) {
-          botcoord = JSON.parse(data);
-        });
-      coord.i = botcoord.i
-      coord.j = botcoord.j
-
-      playNext = jboard.playMove(coord, player, ko);
-
-      if (playNext.success) {
-        jboard.setType(coord, player); // play stone
-        jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
-
-        if (lastMove)
-          jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
-        if (ko)
-          jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
-
-        jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
-        lastMove = coord;
-
-        if (playNext.ko)
-          jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
-        ko = playNext.ko;
-
-        // console.log("JGO.WHITE = " + player);
-        player = JGO.BLACK;
-      } else {
-        console.log('Illegal move: ' + play.errorMsg);
-        alert('Illegal move: ' + play.errorMsg);
+    jsetup.setOptions({
+      stars: {
+        points: 5
       }
+    });
+    jsetup.create('board', function(canvas) {
 
-      console.log("Recieved move from server:");
-      // console.log("JGO.WHITE = " + player);
-      console.log("(" + coord.i + ", " + coord.j + ")");
-    } else {
-      console.log('Illegal move: ' + play.errorMsg);
-      alert('Illegal move: ' + play.errorMsg);
-    }
-  });
+      canvas.addListener('click', function(coord, ev) {
+        console.log("Attepting human move:");
+        console.log("(" + coord.i + ", " + coord.j + ")");
+        var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
 
-  canvas.addListener('mousemove', function(coord, ev) {
-    if(coord.i == -1 || coord.j == -1 || (coord.i == lastX && coord.j == lastY))
-      return;
+        if (ev.shiftKey) { // on shift do edit
+          if (jboard.getMark(coord) == JGO.MARK.NONE)
+            jboard.setMark(coord, JGO.MARK.SELECTED);
+          else
+            jboard.setMark(coord, JGO.MARK.NONE);
+          return;
+        }
 
-    if(lastHover) // clear previous hover if there was one
-      jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+        // clear hover away - it'll be replaced or then it will be an illegal move
+        // in any case so no need to worry about putting it back afterwards
+        if (lastHover)
+          jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+        lastHover = false;
 
-    lastX = coord.i;
-    lastY = coord.j;
+        var play = jboard.playMove(coord, player, ko);
+        if (play.success) {
+          jboard.setType(coord, player); // play stone
+          jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
 
-    if(jboard.getType(coord) == JGO.CLEAR && jboard.getMark(coord) == JGO.MARK.NONE) {
-      jboard.setType(coord, player == JGO.WHITE ? JGO.DIM_WHITE : JGO.DIM_BLACK);
-      lastHover = true;
-    } else
-      lastHover = false;
-  });
+          if (lastMove)
+            jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
+          if (ko)
+            jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
 
-  canvas.addListener('mouseout', function(ev) {
-    if(lastHover)
-      jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+          jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
+          lastMove = coord;
 
-    lastHover = false;
-  });
-});
-</script>
+          if (play.ko)
+            jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
+          ko = play.ko;
+
+          player = JGO.WHITE;
+
+          var botcoord;
+          postMove('/prediction', coord,
+            function(data) {
+              botcoord = JSON.parse(data);
+            });
+          coord.i = botcoord.i
+          coord.j = botcoord.j
+
+          playNext = jboard.playMove(coord, player, ko);
+
+          if (playNext.success) {
+            jboard.setType(coord, player); // play stone
+            jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
+
+            if (lastMove)
+              jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
+            if (ko)
+              jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
+
+            jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
+            lastMove = coord;
+
+            if (playNext.ko)
+              jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
+            ko = playNext.ko;
+
+            // console.log("JGO.WHITE = " + player);
+            player = JGO.BLACK;
+          }
+          else {
+            console.log('Illegal move: ' + play.errorMsg);
+            alert('Illegal move: ' + play.errorMsg);
+          }
+
+          console.log("Recieved move from server:");
+          // console.log("JGO.WHITE = " + player);
+          console.log("(" + coord.i + ", " + coord.j + ")");
+        }
+        else {
+          console.log('Illegal move: ' + play.errorMsg);
+          alert('Illegal move: ' + play.errorMsg);
+        }
+      });
+
+      canvas.addListener('mousemove', function(coord, ev) {
+        if (coord.i == -1 || coord.j == -1 || (coord.i == lastX && coord.j == lastY))
+          return;
+
+        if (lastHover) // clear previous hover if there was one
+          jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+
+        lastX = coord.i;
+        lastY = coord.j;
+
+        if (jboard.getType(coord) == JGO.CLEAR && jboard.getMark(coord) == JGO.MARK.NONE) {
+          jboard.setType(coord, player == JGO.WHITE ? JGO.DIM_WHITE : JGO.DIM_BLACK);
+          lastHover = true;
+        }
+        else
+          lastHover = false;
+      });
+
+      canvas.addListener('mouseout', function(ev) {
+        if (lastHover)
+          jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
+
+        lastHover = false;
+      });
+    });
+  </script>
 
 </body>
+
 </html>
