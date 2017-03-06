@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import numpy as np
 
@@ -6,6 +7,7 @@ from betago.corpora import build_index, find_sgfs, load_index, store_index
 from betago.gosgf import Sgf_game
 from betago.dataloader import goboard
 from betago.processor import SevenPlaneProcessor
+from betago.training import TrainingRun
 
 from keras.callbacks import ModelCheckpoint
 from keras.models import Sequential
@@ -29,13 +31,20 @@ def show(args):
 
 
 def train(args):
-    corpus_index = load_index(open(args.file))
+    corpus_index = load_index(open(args.index))
     print "Index contains %d chunks in %d physical files" % (
         corpus_index.num_chunks, len(corpus_index.physical_files))
-    chunk_iterator = corpus_index.get_chunk(args.chunk)
+    if not os.path.exists(args.progress):
+        run = TrainingRun.create(args.progress, corpus_index)
+    else:
+        run = TrainingRun.load(args.progress)
+
+    next_chunk = run.chunks_completed
+    chunk = corpus_index.get_chunk(next_chunk)
+
     processor = SevenPlaneProcessor()
     xs, ys = [], []
-    for i, (board, next_color, next_move) in enumerate(chunk_iterator):
+    for board, next_color, next_move in chunk:
         if next_move is not None:
             # Can't train on passes atm.
             feature, label = processor.feature_and_label(next_color, next_move, board,
@@ -49,28 +58,13 @@ def train(args):
     for i, y in enumerate(ys):
         Y[i][y] = 1
 
+    print "Training epoch %d chunk %d/%d..." % (
+        run.epochs_completed + 1,
+        run.chunks_completed + 1,
+        run.num_chunks)
+    run.model.fit(X, Y, nb_epoch=1)
 
-    print "Compile model..."
-    nb_filters = 30
-    nb_conv = 5
-    input_channels = 7
-    model = Sequential()
-    model.add(Convolution2D(nb_filters, nb_conv, nb_conv, border_mode='valid',
-                            input_shape=(input_channels, 19, 19)))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(nb_classes))
-    model.add(Activation('softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
-
-    print "Train model..."
-    model.fit(X, Y, nb_epoch=1)
+    run.complete_chunk()
 
 
 def main():
@@ -90,11 +84,10 @@ def main():
     show_parser.set_defaults(command='show')
     show_parser.add_argument('--file', '-f', required=True, help='Index file.')
 
-    train_parser = subparsers.add_parser('train', help='Train on a chunk.')
+    train_parser = subparsers.add_parser('train', help='Do some training.')
     train_parser.set_defaults(command='train')
-    train_parser.add_argument('--file', '-f', required=True, help='Index file.')
-    train_parser.add_argument('--chunk', '-c', type=int, default=0,
-                              help='Chunk number to train on.')
+    train_parser.add_argument('--index', '-i', required=True, help='Index file.')
+    train_parser.add_argument('--progress', '-p', required=True, help='Progress file.')
 
     args = parser.parse_args()
 
