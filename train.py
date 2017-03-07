@@ -32,29 +32,52 @@ def show(args):
     print goboard.to_string(board)
 
 
-def prepare_training_data(next_chunk, corpus_index, output_q, stop_q):
+def _prepare_training_data_single_process(worker_idx, chunk, corpus_index, output_q, stop_q):
     processor = SevenPlaneProcessor()
 
-    while True:
-        chunk = corpus_index.get_chunk(next_chunk)
-        xs, ys = [], []
-        for board, next_color, next_move in chunk:
-            if not stop_q.empty():
-                print "Got stop signal, aborting."
-                return
-            feature, label = processor.feature_and_label(next_color, next_move, board,
-                                                         processor.num_planes)
-            xs.append(feature)
-            ys.append(label)
-        X = np.array(xs)
-        # one-hot encode the moves
-        nb_classes = 19 * 19
-        Y = np.zeros((len(ys), nb_classes))
-        for i, y in enumerate(ys):
-            Y[i][y] = 1
-        output_q.put((X, Y))
+    chunk = corpus_index.get_chunk(chunk)
+    xs, ys = [], []
+    for board, next_color, next_move in chunk:
+        if not stop_q.empty():
+            print "Got stop signal, aborting."
+            return
+        feature, label = processor.feature_and_label(next_color, next_move, board,
+                                                     processor.num_planes)
+        xs.append(feature)
+        ys.append(label)
+    X = np.array(xs)
+    # one-hot encode the moves
+    nb_classes = 19 * 19
+    Y = np.zeros((len(ys), nb_classes))
+    for i, y in enumerate(ys):
+        Y[i][y] = 1
+    output_q.put((worker_idx, X, Y))
 
-        next_chunk = (next_chunk + 1) % corpus_index.num_chunks
+
+def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_q):
+    inter_q = multiprocessing.Queue()
+    while True:
+        if not stop_q.empty():
+            return
+        chunks_to_process = []
+        for _ in range(num_workers):
+            chunks_to_process.append(next_chunk)
+            next_chunk = (next_chunk + 1) % corpus_index.num_chunks
+        workers = []
+        for i, chunk in enumerate(chunks_to_process):
+            workers.append(multiprocessing.Process(
+                target=_prepare_training_data_single_process,
+                args=(i, chunk, corpus_index, inter_q, stop_q)))
+        for worker in workers:
+            worker.start()
+        results = []
+        while len(results) < len(workers):
+            results.append(inter_q.get())
+        for worker in workers:
+            worker.join()
+        results.sort()
+        for _, X, Y in results:
+            output_q.put((X, Y))
 
 
 def train(args):
@@ -66,10 +89,10 @@ def train(args):
     else:
         run = TrainingRun.load(args.progress)
 
-    q = multiprocessing.Queue(maxsize=3)
+    q = multiprocessing.Queue(maxsize=2 * args.workers)
     stop_q = multiprocessing.Queue()
     p = multiprocessing.Process(target=prepare_training_data,
-                                args=(run.chunks_completed, corpus_index, q, stop_q))
+                                args=(args.workers, run.chunks_completed, corpus_index, q, stop_q))
     p.start()
     try:
         while True:
@@ -110,6 +133,8 @@ def main():
     train_parser.set_defaults(command='train')
     train_parser.add_argument('--index', '-i', required=True, help='Index file.')
     train_parser.add_argument('--progress', '-p', required=True, help='Progress file.')
+    train_parser.add_argument('--workers', '-w', type=int, default=1,
+                              help='Number of workers to use for preprocessing boards.')
 
     args = parser.parse_args()
 
