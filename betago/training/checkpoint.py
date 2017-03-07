@@ -1,3 +1,5 @@
+import os
+
 import h5py
 from keras.models import Sequential, model_from_json
 from keras.layers.core import Dense, Dropout, Activation, Flatten
@@ -18,6 +20,13 @@ class TrainingRun(object):
         self.num_chunks = num_chunks
 
     def save(self):
+        # Backup the original file in case something goes wrong while
+        # saving the new checkpoint.
+        backup = None
+        if os.path.exists(self.filename):
+            backup = self.filename + '.bak'
+            os.rename(self.filename, backup)
+
         output = h5py.File(self.filename, 'w')
         model_weights = output.create_group('model_weights')
         self.model.save_weights_to_hdf5_group(model_weights)
@@ -27,6 +36,10 @@ class TrainingRun(object):
         metadata.attrs['chunks_completed'] = self.chunks_completed
         metadata.attrs['num_chunks'] = self.num_chunks
         output.close()
+
+        # If we got here, we no longer need the backup.
+        if backup is not None:
+            os.unlink(backup)
 
     def complete_chunk(self):
         self.chunks_completed += 1
