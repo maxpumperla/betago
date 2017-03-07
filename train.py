@@ -1,9 +1,11 @@
 import argparse
 import multiprocessing
 import os
+import signal
 import time
 
 import numpy as np
+import six.moves.queue as queue
 
 from betago.corpora import build_index, find_sgfs, load_index, store_index
 from betago.gosgf import Sgf_game
@@ -32,7 +34,13 @@ def show(args):
     print goboard.to_string(board)
 
 
+def _disable_keyboard_interrupt():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
 def _prepare_training_data_single_process(worker_idx, chunk, corpus_index, output_q, stop_q):
+    # Make sure ^C gets handled in the main process.
+    _disable_keyboard_interrupt()
     processor = SevenPlaneProcessor()
 
     chunk = corpus_index.get_chunk(chunk)
@@ -55,6 +63,9 @@ def _prepare_training_data_single_process(worker_idx, chunk, corpus_index, outpu
 
 
 def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_q):
+    # Make sure ^C gets handled in the main process.
+    _disable_keyboard_interrupt()
+
     inter_q = multiprocessing.Queue()
     while True:
         if not stop_q.empty():
@@ -72,9 +83,16 @@ def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_
             worker.start()
         results = []
         while len(results) < len(workers):
-            results.append(inter_q.get())
+            try:
+                results.append(inter_q.get(block=True, timeout=1))
+            except queue.Empty:
+                if not stop_q.empty():
+                    break
         for worker in workers:
             worker.join()
+        if len(results) < len(workers):
+            # This will happen if we were shut down.
+            return
         results.sort()
         for _, X, Y in results:
             output_q.put((X, Y))
@@ -108,6 +126,7 @@ def train(args):
             run.model.fit(X, Y, nb_epoch=1)
             run.complete_chunk()
     finally:
+        print "Shutting down workers, please wait..."
         stop_q.put(1)
         p.join()
 
