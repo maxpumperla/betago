@@ -131,6 +131,16 @@ def train(args):
         p.join()
 
 
+def export(args):
+    run = TrainingRun.load(args.progress)
+
+    model_file = args.bot + '_bot.yml'
+    weight_file = args.bot + '_weights.hd5'
+    run.model.save_weights(weight_file, overwrite=True)
+    with open(model_file, 'w') as yml:
+        yml.write(run.model.to_yaml())
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -155,6 +165,11 @@ def main():
     train_parser.add_argument('--workers', '-w', type=int, default=1,
                               help='Number of workers to use for preprocessing boards.')
 
+    export_parser = subparsers.add_parser('export', help='Export a bot from a training run.')
+    export_parser.set_defaults(command='export')
+    export_parser.add_argument('--progress', '-p', required=True, help='Progress file.')
+    export_parser.add_argument('--bot', '-b', help='Bot file name.')
+
     args = parser.parse_args()
 
     if args.command == 'index':
@@ -163,6 +178,8 @@ def main():
         show(args)
     elif args.command == 'train':
         train(args)
+    elif args.command == 'export':
+        export(args)
 
 if __name__ == '__main__':
     main()
