@@ -74,17 +74,21 @@ class CorpusIndex(object):
             for sgf in self._generate_games(physical_file):
                 if sgf.locator < start:
                     continue
-                game_record = Sgf_game.from_string(sgf.contents)
                 board = GoBoard(19)
-                # Set up the handicap.
-                if game_record.get_handicap() > 0:
-                    for setup in game_record.get_root().get_setup_stones():
-                        for move in setup:
-                            board.apply_move('b', move)
-                for i, (color, move) in enumerate(_sequence(game_record)):
-                    yield copy.deepcopy(board), color, move
-                    if move is not None:
-                        board.apply_move(color, move)
+                try:
+                    game_record = Sgf_game.from_string(sgf.contents)
+                    # Set up the handicap.
+                    if game_record.get_handicap() > 0:
+                        for setup in game_record.get_root().get_setup_stones():
+                            for move in setup:
+                                board.apply_move('b', move)
+                    for i, (color, move) in enumerate(_sequence(game_record)):
+                        yield copy.deepcopy(board), color, move
+                        if move is not None:
+                            board.apply_move(color, move)
+                except ValueError:
+                    print("Invalid SGF data, skipping game record %s" % (sgf,))
+                    print("Board was:\n%s" % (board,))
 
     def _generate_games(self, physical_file):
         with tarball_iterator(physical_file) as tarball:
