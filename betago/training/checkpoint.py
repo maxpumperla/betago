@@ -1,9 +1,12 @@
 import os
 
 import h5py
+from keras import backend as K
 from keras.models import Sequential, model_from_json
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, ZeroPadding2D
+
+from . import kerashack
 
 
 __all__ = [
@@ -28,10 +31,9 @@ class TrainingRun(object):
             os.rename(self.filename, backup)
 
         output = h5py.File(self.filename, 'w')
-        model_weights = output.create_group('model_weights')
-        self.model.save_weights_to_hdf5_group(model_weights)
+        model_out = output.create_group('model')
+        kerashack.save_model_to_hdf5_group(self.model, model_out)
         metadata = output.create_group('metadata')
-        metadata.attrs['model_structure'] = unicode(self.model.to_json())
         metadata.attrs['epochs_completed'] = self.epochs_completed
         metadata.attrs['chunks_completed'] = self.chunks_completed
         metadata.attrs['num_chunks'] = self.num_chunks
@@ -51,9 +53,7 @@ class TrainingRun(object):
     @classmethod
     def load(cls, filename):
         inp = h5py.File(filename, 'r')
-        model = model_from_json(inp['metadata'].attrs['model_structure'])
-        model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
-        model.load_weights_from_hdf5_group(inp['model_weights'])
+        model = kerashack.load_model_from_hdf5_group(inp['model'])
         training_run = cls(filename,
                            model,
                            inp['metadata'].attrs['epochs_completed'],
