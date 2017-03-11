@@ -13,11 +13,12 @@ from .processor import ThreePlaneProcessor
 
 class HTTPFrontend(object):
     '''
-    HTTPFrontend is a simple Flask app served on localhost:5000, exposing a REST API to predict
+    HTTPFrontend is a simple Flask app served on localhost:8080, exposing a REST API to predict
     go moves.
     '''
-    def __init__(self, bot):
+    def __init__(self, bot, port=8080):
         self.bot = bot
+        self.port = port
 
     def start_server(self):
         ''' Start Go model server '''
@@ -35,9 +36,17 @@ class HTTPFrontend(object):
         CORS(app, resources={r"/prediction/*": {"origins": "*"}})
         self.app = app
 
+        @app.route('/dist/<path:path>')
+        def static_file_dist(path):
+            return open("ui/dist/" + path).read()
+
+        @app.route('/large/<path:path>')
+        def static_file_large(path):
+            return open("ui/large/" + path).read()
+
         @app.route('/')
         def home():
-            return 'betago'
+            return open("ui/demoBot.html").read()
 
         @app.route('/prediction', methods=['GET', 'POST'])
         def next_move():
@@ -46,18 +55,20 @@ class HTTPFrontend(object):
             Parses the move and hands the work off to the bot.
             '''
             content = request.json
-            row = content['i']
-            col = content['j']
-            self.bot.apply_move('w', (row, col))
+            col = content['i']
+            row = content['j']
+            print('Received move:')
+            print(col, row)
+            self.bot.apply_move('b', (row, col))
 
-            bot_row, bot_col = self.bot.select_move('b')
+            bot_row, bot_col = self.bot.select_move('w')
             print('Prediction:')
-            print(bot_row, bot_col)
-            result = {'i': bot_row, 'j': bot_col}
+            print(bot_col, bot_row)
+            result = {'i': bot_col, 'j': bot_row}
             json_result = jsonify(**result)
             return json_result
 
-        self.app.run(host='0.0.0.0', debug=True, threaded=True, use_reloader=False)
+        self.app.run(host='0.0.0.0', port=self.port, debug=True, use_reloader=False)
 
 
 class GoModel(object):

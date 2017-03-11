@@ -19,12 +19,13 @@
 <script type="text/javascript">
 var jboard = new JGO.Board(19);
 var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
-var player = JGO.WHITE; // next player
+var player = JGO.BLACK; // next player
 var ko = false, lastMove = false; // ko coordinate and last move coordinate
 var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
 
 // Man, do I want to use superagent here. Repeat: add. no. dependencies.
 function postMove(url, data, success) {
+    console.log("Sent move to server!");
     var xmlhttp;
     xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", url, false);
@@ -46,6 +47,8 @@ jsetup.setOptions({stars: {points:5}});
 jsetup.create('board', function(canvas) {
 
   canvas.addListener('click', function(coord, ev) {
+    console.log("Attepting human move:");
+    console.log("(" + coord.i + ", " + coord.j + ")");
     var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
 
     if(ev.shiftKey) { // on shift do edit
@@ -79,13 +82,15 @@ jsetup.create('board', function(canvas) {
         jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = play.ko;
 
-      player = JGO.BLACK;
-    } else alert('Illegal move A: ' + play.errorMsg);
-
+      player = JGO.WHITE;
+    } else {
+      console.log('Illegal move: ' + play.errorMsg);
+      alert('Illegal move: ' + play.errorMsg);
+    }
 
     var botcoord;
-    postMove('http://localhost:5000/prediction', coord,
-      function(data) {botcoord = JSON.parse(data)
+    postMove('/prediction', coord,
+      function(data) {botcoord = JSON.parse(data);
       });
     coord.i = botcoord.i
     coord.j = botcoord.j
@@ -108,12 +113,17 @@ jsetup.create('board', function(canvas) {
         jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = playNext.ko;
 
-      console.log(player)
-      player = JGO.WHITE;
-  } else alert('Illegal move: ' + play.errorMsg);
+      // console.log("JGO.WHITE = " + player);
+      player = JGO.BLACK;
+  } else {
+    console.log('Illegal move: ' + play.errorMsg);
+    alert('Illegal move: ' + play.errorMsg);
+  }
 
-  console.log("played black move")
-  console.log(player)
+  console.log("Recieved move from server:");
+  // console.log("JGO.WHITE = " + player);
+  console.log("(" + coord.i + ", " + coord.j + ")");
+
   });
 
   canvas.addListener('mousemove', function(coord, ev) {
