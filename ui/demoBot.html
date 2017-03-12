@@ -36,7 +36,38 @@
     var lastHover = false,
       lastX = -1,
       lastY = -1; // hover helper vars
-    var playNext;
+
+    function playMove(coord, player, ko, success, failure) {
+      success = success || function() {};
+      failure = failure || function() {};
+      var play = jboard.playMove(coord, player, ko);
+      if (play.success) {
+        jboard.setType(coord, player); // play stone
+        jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
+
+        if (lastMove)
+          jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
+        if (ko)
+          jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
+
+        jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
+        lastMove = coord;
+
+        if (play.ko)
+          jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
+        ko = play.ko;
+        success(play);
+      }
+      else {
+        illegalMove(play.errorMsg);
+        failure(play.errorMsg);
+      }
+    }
+
+    function illegalMove(errorMsg) {
+      console.log("Illegal move: " + errorMsg);
+      alert("Illegal move: " + errorMsg);
+    }
 
     // Man, do I want to use superagent here. Repeat: add. no. dependencies.
     function postMove(url, data, success) {
@@ -84,65 +115,20 @@
           jboard.setType(new JGO.Coordinate(lastX, lastY), JGO.CLEAR);
         lastHover = false;
 
-        var play = jboard.playMove(coord, player, ko);
-        if (play.success) {
-          jboard.setType(coord, player); // play stone
-          jboard.setType(play.captures, JGO.CLEAR); // clear opponent's stones
-
-          if (lastMove)
-            jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
-          if (ko)
-            jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
-
-          jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
-          lastMove = coord;
-
-          if (play.ko)
-            jboard.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
-          ko = play.ko;
-
+        playMove(coord, player, ko, function() {
           player = JGO.WHITE;
-
           postMove('/prediction', coord,
             function(data) {
               var botcoord = JSON.parse(data);
               coord.i = botcoord.i;
               coord.j = botcoord.j;
 
-              playNext = jboard.playMove(coord, player, ko);
-
-              if (playNext.success) {
-                jboard.setType(coord, player); // play stone
-                jboard.setType(playNext.captures, JGO.CLEAR); // clear opponent's stones
-
-                if (lastMove)
-                  jboard.setMark(lastMove, JGO.MARK.NONE); // clear previous mark
-                if (ko)
-                  jboard.setMark(ko, JGO.MARK.NONE); // clear previous ko mark
-
-                jboard.setMark(coord, JGO.MARK.CIRCLE); // mark move
-                lastMove = coord;
-
-                if (playNext.ko)
-                  jboard.setMark(playNext.ko, JGO.MARK.CIRCLE); // mark ko, too
-                ko = playNext.ko;
-
-                // console.log("JGO.WHITE = " + player);
-                console.log("Recieved move from server:");
-                // console.log("JGO.WHITE = " + player);
-                console.log("(" + coord.i + ", " + coord.j + ")");
-              }
-              else {
-                console.log('Illegal move by server: ' + play.errorMsg);
-                alert('Illegal move by server: ' + play.errorMsg);
-              }
+              console.log("Recieved move from server:");
+              console.log("(" + coord.i + ", " + coord.j + ")");
+              playMove(coord, player, ko);
             });
-          player = JGO.BLACK;
-        }
-        else {
-          console.log('Illegal move: ' + play.errorMsg);
-          alert('Illegal move: ' + play.errorMsg);
-        }
+        });
+        player = JGO.BLACK;
       });
 
       canvas.addListener('mousemove', function(coord, ev) {
