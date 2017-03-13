@@ -5,6 +5,9 @@ __pycache__/
 # C extensions
 *.so
 
+# vim
+*.swp
+
 # Distribution / packaging
 .Python
 env/
@@ -60,6 +63,7 @@ target/
 betago/data/*
 betago/dataloader/data/*
 examples/data/*
+data
 
 # KGS index
 *kgs_index.html
