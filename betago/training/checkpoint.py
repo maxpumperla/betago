@@ -3,6 +3,7 @@ import os
 import h5py
 from keras import backend as K
 from keras.models import Sequential, model_from_json
+from keras.optimizers import Adadelta
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, ZeroPadding2D
 
@@ -66,7 +67,8 @@ class TrainingRun(object):
     def create(cls, filename, index):
         # TODO Take the model architecture as an input.
         model = _big_model()
-        model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        opt = Adadelta(clipnorm=0.25)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         training_run = cls(filename, model, 0, 0, index.num_chunks)
         training_run.save()
         return training_run
