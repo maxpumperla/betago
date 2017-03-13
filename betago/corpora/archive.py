@@ -72,6 +72,7 @@ class TarballSGFLocator(SGFLocator):
 
 def find_sgfs(path):
     """Find all SGFs in a directory or archive."""
+    print('Examining %s...' % (path,))
     if os.path.isdir(path):
         return _walk_dir(path)
     if tarfile.is_tarfile(path):

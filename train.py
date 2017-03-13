@@ -22,11 +22,8 @@ def index(args):
 
 def show(args):
     corpus_index = load_index(open(args.file))
-    print "Index contains %d chunks in %d physical files" % (
-        corpus_index.num_chunks, len(corpus_index.physical_files))
-    chunk_iterator = corpus_index.get_chunk(corpus_index.num_chunks / 2)
-    board, next_color, next_move = next(chunk_iterator)
-    print goboard.to_string(board)
+    print("Index contains %d chunks in %d physical files" % (
+        corpus_index.num_chunks, len(corpus_index.physical_files)))
 
 
 def _disable_keyboard_interrupt():
@@ -42,7 +39,7 @@ def _prepare_training_data_single_process(worker_idx, chunk, corpus_index, outpu
     xs, ys = [], []
     for board, next_color, next_move in chunk:
         if not stop_q.empty():
-            print "Got stop signal, aborting."
+            print("Got stop signal, aborting.")
             return
         feature, label = processor.feature_and_label(next_color, next_move, board,
                                                      processor.num_planes)
@@ -95,8 +92,8 @@ def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_
 
 def train(args):
     corpus_index = load_index(open(args.index))
-    print "Index contains %d chunks in %d physical files" % (
-        corpus_index.num_chunks, len(corpus_index.physical_files))
+    print("Index contains %d chunks in %d physical files" % (
+        corpus_index.num_chunks, len(corpus_index.physical_files)))
     if not os.path.exists(args.progress):
         run = TrainingRun.create(args.progress, corpus_index)
     else:
@@ -109,19 +106,19 @@ def train(args):
     p.start()
     try:
         while True:
-            print "Waiting for prepared training chunk..."
+            print("Waiting for prepared training chunk...")
             wait_start_ts = time.time()
             X, Y = q.get()
             wait_end_ts = time.time()
-            print "Idle %.1f seconds" % (wait_end_ts - wait_start_ts,)
-            print "Training epoch %d chunk %d/%d..." % (
+            print("Idle %.1f seconds" % (wait_end_ts - wait_start_ts,))
+            print("Training epoch %d chunk %d/%d..." % (
                 run.epochs_completed + 1,
                 run.chunks_completed + 1,
-                run.num_chunks)
+                run.num_chunks))
             run.model.fit(X, Y, nb_epoch=1)
             run.complete_chunk()
     finally:
-        print "Shutting down workers, please wait..."
+        print("Shutting down workers, please wait...")
         stop_q.put(1)
         p.join()
 
