@@ -4,6 +4,7 @@ import os
 import signal
 import time
 
+import keras.backend
 import numpy as np
 import six.moves.queue as queue
 
@@ -12,12 +13,6 @@ from betago.gosgf import Sgf_game
 from betago.dataloader import goboard
 from betago.processor import SevenPlaneProcessor
 from betago.training import TrainingRun
-
-from keras.callbacks import ModelCheckpoint
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
-from keras.utils import np_utils
 
 
 def index(args):
@@ -142,6 +137,9 @@ def export(args):
 
 
 def main():
+    # TODO Where to put this???
+    keras.backend.set_image_dim_ordering('th')
+
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
