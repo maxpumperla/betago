@@ -17,10 +17,6 @@ class SevenPlaneProcessor(GoDataProcessor):
                                                   num_planes=num_planes,
                                                   consolidate=consolidate,
                                                   use_generator=use_generator)
-        # We use theano-style indexing. It works fine with Tensorflow,
-        # as long as we tell keras to do the conversion.
-        # TODO Is the processor the correct place to set this?
-        keras.backend.set_image_dim_ordering('th')
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''
@@ -76,8 +72,6 @@ class ThreePlaneProcessor(GoDataProcessor):
                                                   num_planes=num_planes,
                                                   consolidate=consolidate,
                                                   use_generator=use_generator)
-        # TODO Is the processor the correct place to set this?
-        keras.backend.set_image_dim_ordering('th')
 
     def feature_and_label(self, color, move, go_board, num_planes):
         '''
@@ -116,8 +110,6 @@ class SevenPlaneFileProcessor(GoFileProcessor):
     def __init__(self, data_directory='data', num_planes=7, consolidate=True):
         super(SevenPlaneFileProcessor, self).__init__(data_directory=data_directory,
                                                       num_planes=num_planes, consolidate=consolidate)
-        # TODO Is the processor the correct place to set this?
-        keras.backend.set_image_dim_ordering('th')
 
     def store_results(self, data_file, color, move, go_board):
         '''
