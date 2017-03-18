@@ -1,222 +1,288 @@
+backend: !!python/unicode 'tensorflow'
 class_name: Sequential
 config:
 - class_name: ZeroPadding2D
   config:
     batch_input_shape: !!python/tuple [null, 7, 19, 19]
-    input_dtype: !!python/unicode 'float32'
-    name: !!python/unicode 'zeropadding2d_1'
-    padding: [3, 3]
+    data_format: !!python/unicode 'channels_first'
+    dtype: !!python/unicode 'float32'
+    name: !!python/unicode 'zero_padding2d_1'
+    padding: !!python/tuple
+    - !!python/tuple [3, 3]
+    - !!python/tuple [3, 3]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_1'
-    nb_col: 7
-    nb_filter: 64
-    nb_row: 7
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 64
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [7, 7]
+    name: !!python/unicode 'conv2d_1'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_1', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_2'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_2'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_2'
-    nb_col: 5
-    nb_filter: 64
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 64
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_2'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_2', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_3'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_3'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_3'
-    nb_col: 5
-    nb_filter: 64
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 64
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_3'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_3', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_4'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_4'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_4'
-    nb_col: 5
-    nb_filter: 48
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 48
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_4'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_4', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_5'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_5'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_5'
-    nb_col: 5
-    nb_filter: 48
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 48
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_5'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_5', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_6'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_6'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_6'
-    nb_col: 5
-    nb_filter: 32
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 32
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_6'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_6', trainable: true}
 - class_name: ZeroPadding2D
   config:
-    name: !!python/unicode 'zeropadding2d_7'
-    padding: [2, 2]
+    data_format: !!python/unicode 'channels_first'
+    name: !!python/unicode 'zero_padding2d_7'
+    padding: !!python/tuple
+    - !!python/tuple [2, 2]
+    - !!python/tuple [2, 2]
     trainable: true
-- class_name: Convolution2D
+- class_name: Conv2D
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    bias: true
-    border_mode: !!python/unicode 'valid'
-    dim_ordering: !!python/unicode 'th'
-    init: glorot_uniform
-    name: !!python/unicode 'convolution2d_7'
-    nb_col: 5
-    nb_filter: 32
-    nb_row: 5
-    subsample: !!python/tuple [1, 1]
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    data_format: !!python/unicode 'channels_first'
+    dilation_rate: !!python/tuple [1, 1]
+    filters: 32
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
+    kernel_size: !!python/tuple [5, 5]
+    name: !!python/unicode 'conv2d_7'
+    padding: !!python/unicode 'valid'
+    strides: !!python/tuple [1, 1]
     trainable: true
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_7', trainable: true}
 - class_name: Flatten
   config: {name: !!python/unicode 'flatten_1', trainable: true}
 - class_name: Dense
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    batch_input_shape: !!python/tuple [null, 11552]
-    bias: true
-    init: glorot_uniform
-    input_dim: !!python/object/apply:numpy.core.multiarray.scalar
-    - !!python/object/apply:numpy.dtype
-      args: [i8, 0, 1]
-      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
-    - " -\0\0\0\0\0\0"
-    input_dtype: !!python/unicode 'float32'
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
     name: !!python/unicode 'dense_1'
-    output_dim: 1024
     trainable: true
+    units: 1024
+    use_bias: true
 - class_name: Activation
   config: {activation: relu, name: !!python/unicode 'activation_8', trainable: true}
 - class_name: Dense
   config:
-    W_constraint: null
-    W_regularizer: null
     activation: linear
     activity_regularizer: null
-    b_constraint: null
-    b_regularizer: null
-    batch_input_shape: !!python/tuple [null, 1024]
-    bias: true
-    init: glorot_uniform
-    input_dim: 1024
-    input_dtype: !!python/unicode 'float32'
+    bias_constraint: null
+    bias_initializer:
+      class_name: Zeros
+      config: {}
+    bias_regularizer: null
+    kernel_constraint: null
+    kernel_initializer:
+      class_name: VarianceScaling
+      config: {distribution: !!python/unicode 'uniform', mode: !!python/unicode 'fan_avg',
+        scale: 1.0, seed: null}
+    kernel_regularizer: null
     name: !!python/unicode 'dense_2'
-    output_dim: 361
     trainable: true
+    units: 361
+    use_bias: true
 - class_name: Activation
   config: {activation: softmax, name: !!python/unicode 'activation_9', trainable: true}
-keras_version: 1.2.2
+keras_version: 2.0.1
