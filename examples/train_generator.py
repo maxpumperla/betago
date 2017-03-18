@@ -6,7 +6,7 @@ import os
 from keras.callbacks import ModelCheckpoint
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
+from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.utils import np_utils
 
 from betago.processor import SevenPlaneProcessor
@@ -43,10 +43,11 @@ print(data_generator.get_num_samples())
 # Specify a keras model with two convolutional layers and two dense layers,
 # connecting the (num_samples, 7, 19, 19) input to the 19*19 output vector.
 model = Sequential()
-model.add(Convolution2D(nb_filters, nb_conv, nb_conv, border_mode='valid',
-                        input_shape=(input_channels, go_board_rows, go_board_cols)))
+model.add(Conv2D(nb_filters, (nb_conv, nb_conv), padding='valid',
+                 input_shape=(input_channels, go_board_rows, go_board_cols),
+                 data_format='channels_first'))
 model.add(Activation('relu'))
-model.add(Convolution2D(nb_filters, nb_conv, nb_conv))
+model.add(Conv2D(nb_filters, (nb_conv, nb_conv), data_format='channels_first'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
 model.add(Dropout(0.25))

@@ -5,7 +5,7 @@ from keras import backend as K
 from keras.models import Sequential, model_from_json
 from keras.optimizers import Adadelta
 from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution2D, ZeroPadding2D
+from keras.layers.convolutional import Conv2D, ZeroPadding2D
 
 from . import kerashack
 
@@ -78,31 +78,31 @@ class TrainingRun(object):
 def _big_model():
     model = Sequential()
     model.add(ZeroPadding2D((3, 3), input_shape=(7, 19, 19)))
-    model.add(Convolution2D(64, 7, 7, border_mode='valid'))
+    model.add(Conv2D(64, (7, 7), padding='valid', data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(64, 5, 5))
+    model.add(Conv2D(64, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(64, 5, 5))
+    model.add(Conv2D(64, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(48, 5, 5))
+    model.add(Conv2D(48, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(48, 5, 5))
+    model.add(Conv2D(48, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5))
+    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5))
+    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(Flatten())
@@ -116,19 +116,19 @@ def _big_model():
 def _small_model():
     model = Sequential()
     model.add(ZeroPadding2D((3, 3), input_shape=(7, 19, 19)))
-    model.add(Convolution2D(48, 7, 7, border_mode='valid'))
+    model.add(Conv2D(48, (7, 7), padding='valid', data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5))
+    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5))
+    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(ZeroPadding2D((2, 2)))
-    model.add(Convolution2D(32, 5, 5))
+    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
     model.add(Activation('relu'))
 
     model.add(Flatten())

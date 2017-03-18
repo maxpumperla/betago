@@ -115,7 +115,7 @@ def train(args):
                 run.epochs_completed + 1,
                 run.chunks_completed + 1,
                 run.num_chunks))
-            run.model.fit(X, Y, nb_epoch=1)
+            run.model.fit(X, Y, epochs=1)
             run.complete_chunk()
     finally:
         print("Shutting down workers, please wait...")
@@ -134,9 +134,6 @@ def export(args):
 
 
 def main():
-    # TODO Where to put this???
-    keras.backend.set_image_dim_ordering('th')
-
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
