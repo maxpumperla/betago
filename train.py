@@ -52,21 +52,27 @@ def _prepare_training_data_single_process(worker_idx, chunk, corpus_index, outpu
     for i, y in enumerate(ys):
         Y[i][y] = 1
     output_q.put((worker_idx, X, Y))
+    output_q.close()
 
 
 def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_q):
     # Make sure ^C gets handled in the main process.
     _disable_keyboard_interrupt()
+    stopped = False
 
-    inter_q = multiprocessing.Queue()
     while True:
         if not stop_q.empty():
+            output_q.close()
+            output_q.join_thread()
+            stop_q.close()
+            stop_q.join_thread()
             return
         chunks_to_process = []
         for _ in range(num_workers):
             chunks_to_process.append(next_chunk)
             next_chunk = (next_chunk + 1) % corpus_index.num_chunks
         workers = []
+        inter_q = multiprocessing.Queue()
         for i, chunk in enumerate(chunks_to_process):
             workers.append(multiprocessing.Process(
                 target=_prepare_training_data_single_process,
@@ -79,12 +85,16 @@ def prepare_training_data(num_workers, next_chunk, corpus_index, output_q, stop_
                 results.append(inter_q.get(block=True, timeout=1))
             except queue.Empty:
                 if not stop_q.empty():
+                    stopped = True
                     break
         for worker in workers:
             worker.join()
-        if len(results) < len(workers):
-            # This will happen if we were shut down.
+        inter_q.close()
+        inter_q.join_thread()
+        if stopped:
+            output_q.close()
             return
+        assert len(results) == len(workers)
         results.sort()
         for _, X, Y in results:
             output_q.put((X, Y))
@@ -118,8 +128,14 @@ def train(args):
             run.model.fit(X, Y, epochs=1)
             run.complete_chunk()
     finally:
+        # Drain the receive queue.
+        while not q.empty():
+            q.get()
+        q.close()
+        q.join_thread()
         print("Shutting down workers, please wait...")
         stop_q.put(1)
+        stop_q.close()
         p.join()
 
 
