@@ -64,76 +64,14 @@ class TrainingRun(object):
         return training_run
 
     @classmethod
-    def create(cls, filename, index):
-        # TODO Take the model architecture as an input.
-        model = _big_model()
+    def create(cls, filename, index, layer_fn):
+        model = Sequential()
+        for layer in layer_fn((7, 19, 19)):
+            model.add(layer)
+        model.add(Dense(19 * 19))
+        model.add(Activation('softmax'))
         opt = Adadelta(clipnorm=0.25)
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         training_run = cls(filename, model, 0, 0, index.num_chunks)
         training_run.save()
         return training_run
-
-
-
-def _big_model():
-    model = Sequential()
-    model.add(ZeroPadding2D((3, 3), input_shape=(7, 19, 19)))
-    model.add(Conv2D(64, (7, 7), padding='valid', data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(64, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(64, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(48, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(48, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(Flatten())
-    model.add(Dense(1024))
-    model.add(Activation('relu'))
-    model.add(Dense(19 * 19))
-    model.add(Activation('softmax'))
-    return model
-
-
-def _small_model():
-    model = Sequential()
-    model.add(ZeroPadding2D((3, 3), input_shape=(7, 19, 19)))
-    model.add(Conv2D(48, (7, 7), padding='valid', data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(ZeroPadding2D((2, 2)))
-    model.add(Conv2D(32, (5, 5), data_format='channels_first'))
-    model.add(Activation('relu'))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(19 * 19))
-    model.add(Activation('softmax'))
-    return model

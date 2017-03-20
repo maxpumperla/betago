@@ -1,7 +1,9 @@
 import argparse
+import importlib
 import multiprocessing
 import os
 import signal
+import sys
 import time
 
 import keras.backend
@@ -24,6 +26,41 @@ def show(args):
     corpus_index = load_index(open(args.file))
     print("Index contains %d chunks in %d physical files" % (
         corpus_index.num_chunks, len(corpus_index.physical_files)))
+
+
+def _load_module_from_filename(filename):
+    if sys.version_info < (3, 3):
+        import imp
+        return imp.load_source('dynamicmodule', filename)
+    elif sys.version_info < (3, 5):
+        from importlib.machinery import SourceFileLoader
+        return SourceFileLoader('dynamicmodule', filename).load_module()
+    else:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('dynamicmodule', filename)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+
+def _load_network_by_name(name):
+    mod = None
+    if os.path.exists(name):
+        mod = _load_module_from_filename(name)
+    else:
+        try:
+            mod = importlib.import_module('betago.' + name)
+        except ImportError:
+            mod = importlib.import_module(name)
+    if not hasattr(mod, 'layers'):
+        raise ImportError('%s does not defined a layers function.' % (name,))
+    return mod.layers
+
+
+def init(args):
+    corpus_index = load_index(open(args.index))
+    layer_fn = _load_network_by_name(args.network)
+    run = TrainingRun.create(args.progress, corpus_index, layer_fn)
 
 
 def _disable_keyboard_interrupt():
@@ -95,7 +132,7 @@ def train(args):
     print("Index contains %d chunks in %d physical files" % (
         corpus_index.num_chunks, len(corpus_index.physical_files)))
     if not os.path.exists(args.progress):
-        run = TrainingRun.create(args.progress, corpus_index)
+        print('%s does not exist. Run train.py init first.' % (args.progress,))
     else:
         run = TrainingRun.load(args.progress)
 
@@ -150,6 +187,14 @@ def main():
     show_parser.set_defaults(command='show')
     show_parser.add_argument('--file', '-f', required=True, help='Index file.')
 
+    init_parser = subparsers.add_parser('init', help='Start training.')
+    init_parser.set_defaults(command='init')
+    init_parser.add_argument('--index', '-i', required=True, help='Index file.')
+    init_parser.add_argument('--progress', '-p', required=True, help='Progress file.')
+    init_parser.add_argument('--network', '-n', required=True,
+                             help='Python module that defines the network architecture, '
+                                  'e.g. "networks.small"')
+
     train_parser = subparsers.add_parser('train', help='Do some training.')
     train_parser.set_defaults(command='train')
     train_parser.add_argument('--index', '-i', required=True, help='Index file.')
@@ -168,6 +213,8 @@ def main():
         index(args)
     elif args.command == 'show':
         show(args)
+    elif args.command == 'init':
+        init(args)
     elif args.command == 'train':
         train(args)
     elif args.command == 'export':
