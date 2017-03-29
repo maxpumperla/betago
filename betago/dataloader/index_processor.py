@@ -2,10 +2,15 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import sys
-import urllib
 import multiprocessing
+import six
+if sys.version_info[0] == 3:
+    from urllib.request import urlopen, urlretrieve
+else:
+    from urllib import urlopen, urlretrieve
 
 
 def worker(url_and_target):
@@ -15,7 +20,7 @@ def worker(url_and_target):
     try:
         (url, target_path) = url_and_target
         print('>>> Downloading ' + target_path)
-        urllib.urlretrieve(url, target_path)
+        urlretrieve(url, target_path)
     except (KeyboardInterrupt, SystemExit):
         print('>>> Exiting child process')
 
@@ -80,8 +85,8 @@ class KGSIndex(object):
             index_file.close()
         else:
             print('>>> Downloading index page')
-            fp = urllib.urlopen(self.kgs_url)
-            data = unicode(fp.read())
+            fp = urlopen(self.kgs_url)
+            data = six.text_type(fp.read())
             fp.close()
             index_contents = data
             index_file = open(self.index_page, 'w')
@@ -102,7 +107,7 @@ class KGSIndex(object):
         for url in self.urls:
             filename = os.path.basename(url)
             split_file_name = filename.split('-')
-            num_games = int(split_file_name[len(split_file_name)-2])
+            num_games = int(split_file_name[len(split_file_name) - 2])
             print(filename + ' ' + str(num_games))
             self.file_info.append({'url': url, 'filename': filename, 'num_games': num_games})
 

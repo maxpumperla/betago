@@ -1,4 +1,6 @@
+from __future__ import absolute_import
 import itertools
+from six.moves import range
 
 
 class Territory(object):
@@ -31,7 +33,7 @@ def evaluate_territory(board):
     trivially dead groups.
     """
     status = {}
-    for r, c in itertools.product(range(board.board_size), range(board.board_size)):
+    for r, c in itertools.product(list(range(board.board_size)), list(range(board.board_size))):
         if (r, c) in status:
             # Already visited this as part of a different group.
             continue

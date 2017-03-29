@@ -1,6 +1,7 @@
-import keras.backend
+from __future__ import absolute_import
 import numpy as np
 from .dataloader.base_processor import GoDataProcessor, GoFileProcessor
+from six.moves import range
 
 
 class SevenPlaneProcessor(GoDataProcessor):

@@ -2,7 +2,9 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import absolute_import
 import copy
+from six.moves import range
 
 
 class GoBoard(object):
@@ -70,7 +72,7 @@ class GoBoard(object):
         self.board[pos] = color
 
         row, col = pos
-        for adjpos in [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]:
+        for adjpos in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
             self.add_adjacent_liberty(adjpos, go_string)
         return go_string
 
@@ -102,7 +104,7 @@ class GoBoard(object):
                 if last_go_string is not None and last_go_string.get_num_liberties() == 1:
                     if last_go_string.get_num_stones() == 1:
                         num_adjacent_enemy_liberties = 0
-                        for adjpos in [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]:
+                        for adjpos in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
                             if (self.board.get(adjpos) == enemy_color and
                                self.go_strings[adjpos].get_num_liberties() == 1):
                                 num_adjacent_enemy_liberties = num_adjacent_enemy_liberties + 1
@@ -141,8 +143,8 @@ class GoBoard(object):
                 del self.board[enemy_pos]
                 del self.go_strings[enemy_pos]
                 self.ko_last_move_num_captured = self.ko_last_move_num_captured + 1
-                for adjstring in [(string_row-1, string_col), (string_row+1, string_col),
-                                  (string_row, string_col-1), (string_row, string_col+1)]:
+                for adjstring in [(string_row - 1, string_col), (string_row + 1, string_col),
+                                  (string_row, string_col - 1), (string_row, string_col + 1)]:
                     self.add_liberty_to_adjacent_string(adjstring, enemy_pos, play_color)
 
     def apply_move(self, play_color, pos):

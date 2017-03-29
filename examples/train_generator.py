@@ -7,7 +7,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.utils import np_utils
 
 from betago.processor import SevenPlaneProcessor
 

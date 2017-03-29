@@ -9,19 +9,24 @@ points.
 Adapted from gomill by Matthew Woodcraft, https://github.com/mattheww/gomill
 """
 
+from __future__ import absolute_import
 import codecs
 from math import isinf, isnan
 
 import six
 
 from . import sgf_grammar
+from six.moves import range
 
 # In python 2, indexing a str gives one-character strings.
 # In python 3, indexing a bytes gives ints.
 if six.PY2:
     _bytestring_ord = ord
 else:
-    _bytestring_ord = lambda x: x
+    def identity(x):
+        return x
+    _bytestring_ord = identity
+
 
 def normalise_charset_name(s):
     """Convert an encoding name to the form implied in the SGF spec.
@@ -58,11 +63,12 @@ def interpret_go_point(s, size):
         return None
     # May propagate ValueError
     col_s, row_s = s
-    col = _bytestring_ord(col_s) - 97 # 97 == ord("a")
+    col = _bytestring_ord(col_s) - 97  # 97 == ord("a")
     row = size - _bytestring_ord(row_s) + 96
     if not ((0 <= col < size) and (0 <= row < size)):
         raise ValueError
     return row, col
+
 
 def serialise_go_point(move, size):
     """Serialise a Go Point, Move, or Stone value.
@@ -98,6 +104,7 @@ class _Context(object):
         self.size = size
         self.encoding = encoding
 
+
 def interpret_none(s, context=None):
     """Convert a raw None value to a boolean.
 
@@ -105,6 +112,7 @@ def interpret_none(s, context=None):
 
     """
     return True
+
 
 def serialise_none(b, context=None):
     """Serialise a None value.
@@ -123,6 +131,7 @@ def interpret_number(s, context=None):
 
     """
     return int(s, 10)
+
 
 def serialise_number(i, context=None):
     """Serialise a Number value.
@@ -146,6 +155,7 @@ def interpret_real(s, context=None):
     if isnan(result):
         raise ValueError("not a number")
     return result
+
 
 def serialise_real(f, context=None):
     """Serialise a Real value.
@@ -182,6 +192,7 @@ def interpret_double(s, context=None):
     else:
         return 1
 
+
 def serialise_double(i, context=None):
     """Serialise a Double value.
 
@@ -206,6 +217,7 @@ def interpret_colour(s, context=None):
         raise ValueError
     return colour
 
+
 def serialise_colour(colour, context=None):
     """Serialise a Colour value.
 
@@ -227,6 +239,7 @@ def _transcode(s, encoding):
     else:
         return u.encode("utf-8")
 
+
 def interpret_simpletext(s, context):
     """Convert a raw SimpleText value to a string.
 
@@ -238,6 +251,7 @@ def interpret_simpletext(s, context):
 
     """
     return _transcode(sgf_grammar.simpletext_value(s), context.encoding)
+
 
 def serialise_simpletext(s, context):
     """Serialise a SimpleText value.
@@ -264,6 +278,7 @@ def interpret_text(s, context):
     """
     return _transcode(sgf_grammar.text_value(s), context.encoding)
 
+
 def serialise_text(s, context):
     """Serialise a Text value.
 
@@ -275,7 +290,6 @@ def serialise_text(s, context):
     if context.encoding != "UTF-8":
         s = s.decode("utf-8").encode(context.encoding)
     return sgf_grammar.escape_text(s)
-
 
 
 def interpret_point(s, context):
@@ -290,6 +304,7 @@ def interpret_point(s, context):
     if result is None:
         raise ValueError
     return result
+
 
 def serialise_point(point, context):
     """Serialise a Point or Stone value.
@@ -313,6 +328,7 @@ def interpret_move(s, context):
 
     """
     return interpret_go_point(s, context.size)
+
 
 def serialise_move(move, context):
     """Serialise a Move value.
@@ -351,13 +367,14 @@ def interpret_point_list(values, context):
             bottom, right = interpret_point(p2, context)
             if not (bottom <= top and left <= right):
                 raise ValueError
-            for row in range(bottom, top+1):
-                for col in range(left, right+1):
+            for row in range(bottom, top + 1):
+                for col in range(left, right + 1):
                     result.add((row, col))
         else:
             pt = interpret_point(p1, context)
             result.add(pt)
     return result
+
 
 def serialise_point_list(points, context):
     """Serialise a list of Points, Moves, or Stones.
@@ -391,6 +408,7 @@ def interpret_AP(s, context):
     return (interpret_simpletext(application, context),
             interpret_simpletext(version, context))
 
+
 def serialise_AP(value, context):
     """Serialise an AP (application) property value.
 
@@ -419,6 +437,7 @@ def interpret_ARLN_list(values, context):
                        interpret_point(p2, context)))
     return result
 
+
 def serialise_ARLN_list(values, context):
     """Serialise an AR (arrow) or LN (line) property value.
 
@@ -441,6 +460,7 @@ def interpret_FG(s, context):
         return None
     flags, name = sgf_grammar.parse_compose(s)
     return int(flags), interpret_simpletext(name, context)
+
 
 def serialise_FG(value, context):
     """Serialise an FG (figure) property value.
@@ -471,6 +491,7 @@ def interpret_LB_list(values, context):
                        interpret_simpletext(label, context)))
     return result
 
+
 def serialise_LB_list(values, context):
     """Serialise an LB (label) property value.
 
@@ -490,6 +511,7 @@ class Property_type(object):
         self.uses_list = bool(uses_list)
         self.allows_empty_list = bool(allows_empty_list)
 
+
 def _make_property_type(type_name, allows_empty_list=False):
     return Property_type(
         globals()["interpret_" + type_name],
@@ -498,94 +520,94 @@ def _make_property_type(type_name, allows_empty_list=False):
         allows_empty_list=allows_empty_list)
 
 _property_types_by_name = {
-    'none' :        _make_property_type('none'),
-    'number' :      _make_property_type('number'),
-    'real' :        _make_property_type('real'),
-    'double' :      _make_property_type('double'),
-    'colour' :      _make_property_type('colour'),
-    'simpletext' :  _make_property_type('simpletext'),
-    'text' :        _make_property_type('text'),
-    'point' :       _make_property_type('point'),
-    'move' :        _make_property_type('move'),
-    'point_list' :  _make_property_type('point_list'),
-    'point_elist' : _make_property_type('point_list', allows_empty_list=True),
-    'stone_list' :  _make_property_type('point_list'),
-    'AP' :          _make_property_type('AP'),
-    'ARLN_list' :   _make_property_type('ARLN_list'),
-    'FG' :          _make_property_type('FG'),
-    'LB_list' :     _make_property_type('LB_list'),
+    'none': _make_property_type('none'),
+    'number': _make_property_type('number'),
+    'real': _make_property_type('real'),
+    'double': _make_property_type('double'),
+    'colour': _make_property_type('colour'),
+    'simpletext': _make_property_type('simpletext'),
+    'text': _make_property_type('text'),
+    'point': _make_property_type('point'),
+    'move': _make_property_type('move'),
+    'point_list': _make_property_type('point_list'),
+    'point_elist': _make_property_type('point_list', allows_empty_list=True),
+    'stone_list': _make_property_type('point_list'),
+    'AP': _make_property_type('AP'),
+    'ARLN_list': _make_property_type('ARLN_list'),
+    'FG': _make_property_type('FG'),
+    'LB_list': _make_property_type('LB_list'),
 }
 
 P = _property_types_by_name
 
 _property_types_by_ident = {
-  b'AB' : P['stone_list'],                 # setup         Add Black
-  b'AE' : P['point_list'],                 # setup         Add Empty
-  b'AN' : P['simpletext'],                 # game-info     Annotation
-  b'AP' : P['AP'],                         # root          Application
-  b'AR' : P['ARLN_list'],                  # -             Arrow
-  b'AW' : P['stone_list'],                 # setup         Add White
-  b'B'  : P['move'],                       # move          Black
-  b'BL' : P['real'],                       # move          Black time left
-  b'BM' : P['double'],                     # move          Bad move
-  b'BR' : P['simpletext'],                 # game-info     Black rank
-  b'BT' : P['simpletext'],                 # game-info     Black team
-  b'C'  : P['text'],                       # -             Comment
-  b'CA' : P['simpletext'],                 # root          Charset
-  b'CP' : P['simpletext'],                 # game-info     Copyright
-  b'CR' : P['point_list'],                 # -             Circle
-  b'DD' : P['point_elist'],                # - [inherit]   Dim points
-  b'DM' : P['double'],                     # -             Even position
-  b'DO' : P['none'],                       # move          Doubtful
-  b'DT' : P['simpletext'],                 # game-info     Date
-  b'EV' : P['simpletext'],                 # game-info     Event
-  b'FF' : P['number'],                     # root          Fileformat
-  b'FG' : P['FG'],                         # -             Figure
-  b'GB' : P['double'],                     # -             Good for Black
-  b'GC' : P['text'],                       # game-info     Game comment
-  b'GM' : P['number'],                     # root          Game
-  b'GN' : P['simpletext'],                 # game-info     Game name
-  b'GW' : P['double'],                     # -             Good for White
-  b'HA' : P['number'],                     # game-info     Handicap
-  b'HO' : P['double'],                     # -             Hotspot
-  b'IT' : P['none'],                       # move          Interesting
-  b'KM' : P['real'],                       # game-info     Komi
-  b'KO' : P['none'],                       # move          Ko
-  b'LB' : P['LB_list'],                    # -             Label
-  b'LN' : P['ARLN_list'],                  # -             Line
-  b'MA' : P['point_list'],                 # -             Mark
-  b'MN' : P['number'],                     # move          set move number
-  b'N'  : P['simpletext'],                 # -             Nodename
-  b'OB' : P['number'],                     # move          OtStones Black
-  b'ON' : P['simpletext'],                 # game-info     Opening
-  b'OT' : P['simpletext'],                 # game-info     Overtime
-  b'OW' : P['number'],                     # move          OtStones White
-  b'PB' : P['simpletext'],                 # game-info     Player Black
-  b'PC' : P['simpletext'],                 # game-info     Place
-  b'PL' : P['colour'],                     # setup         Player to play
-  b'PM' : P['number'],                     # - [inherit]   Print move mode
-  b'PW' : P['simpletext'],                 # game-info     Player White
-  b'RE' : P['simpletext'],                 # game-info     Result
-  b'RO' : P['simpletext'],                 # game-info     Round
-  b'RU' : P['simpletext'],                 # game-info     Rules
-  b'SL' : P['point_list'],                 # -             Selected
-  b'SO' : P['simpletext'],                 # game-info     Source
-  b'SQ' : P['point_list'],                 # -             Square
-  b'ST' : P['number'],                     # root          Style
-  b'SZ' : P['number'],                     # root          Size
-  b'TB' : P['point_elist'],                # -             Territory Black
-  b'TE' : P['double'],                     # move          Tesuji
-  b'TM' : P['real'],                       # game-info     Timelimit
-  b'TR' : P['point_list'],                 # -             Triangle
-  b'TW' : P['point_elist'],                # -             Territory White
-  b'UC' : P['double'],                     # -             Unclear pos
-  b'US' : P['simpletext'],                 # game-info     User
-  b'V'  : P['real'],                       # -             Value
-  b'VW' : P['point_elist'],                # - [inherit]   View
-  b'W'  : P['move'],                       # move          White
-  b'WL' : P['real'],                       # move          White time left
-  b'WR' : P['simpletext'],                 # game-info     White rank
-  b'WT' : P['simpletext'],                 # game-info     White team
+    b'AB': P['stone_list'],                 # setup         Add Black
+    b'AE': P['point_list'],                 # setup         Add Empty
+    b'AN': P['simpletext'],                 # game-info     Annotation
+    b'AP': P['AP'],                         # root          Application
+    b'AR': P['ARLN_list'],                  # -             Arrow
+    b'AW': P['stone_list'],                 # setup         Add White
+    b'B': P['move'],                        # move          Black
+    b'BL': P['real'],                       # move          Black time left
+    b'BM': P['double'],                     # move          Bad move
+    b'BR': P['simpletext'],                 # game-info     Black rank
+    b'BT': P['simpletext'],                 # game-info     Black team
+    b'C': P['text'],                        # -             Comment
+    b'CA': P['simpletext'],                 # root          Charset
+    b'CP': P['simpletext'],                 # game-info     Copyright
+    b'CR': P['point_list'],                 # -             Circle
+    b'DD': P['point_elist'],                # - [inherit]   Dim points
+    b'DM': P['double'],                     # -             Even position
+    b'DO': P['none'],                       # move          Doubtful
+    b'DT': P['simpletext'],                 # game-info     Date
+    b'EV': P['simpletext'],                 # game-info     Event
+    b'FF': P['number'],                     # root          Fileformat
+    b'FG': P['FG'],                         # -             Figure
+    b'GB': P['double'],                     # -             Good for Black
+    b'GC': P['text'],                       # game-info     Game comment
+    b'GM': P['number'],                     # root          Game
+    b'GN': P['simpletext'],                 # game-info     Game name
+    b'GW': P['double'],                     # -             Good for White
+    b'HA': P['number'],                     # game-info     Handicap
+    b'HO': P['double'],                     # -             Hotspot
+    b'IT': P['none'],                       # move          Interesting
+    b'KM': P['real'],                       # game-info     Komi
+    b'KO': P['none'],                       # move          Ko
+    b'LB': P['LB_list'],                    # -             Label
+    b'LN': P['ARLN_list'],                  # -             Line
+    b'MA': P['point_list'],                 # -             Mark
+    b'MN': P['number'],                     # move          set move number
+    b'N': P['simpletext'],                  # -             Nodename
+    b'OB': P['number'],                     # move          OtStones Black
+    b'ON': P['simpletext'],                 # game-info     Opening
+    b'OT': P['simpletext'],                 # game-info     Overtime
+    b'OW': P['number'],                     # move          OtStones White
+    b'PB': P['simpletext'],                 # game-info     Player Black
+    b'PC': P['simpletext'],                 # game-info     Place
+    b'PL': P['colour'],                     # setup         Player to play
+    b'PM': P['number'],                     # - [inherit]   Print move mode
+    b'PW': P['simpletext'],                 # game-info     Player White
+    b'RE': P['simpletext'],                 # game-info     Result
+    b'RO': P['simpletext'],                 # game-info     Round
+    b'RU': P['simpletext'],                 # game-info     Rules
+    b'SL': P['point_list'],                 # -             Selected
+    b'SO': P['simpletext'],                 # game-info     Source
+    b'SQ': P['point_list'],                 # -             Square
+    b'ST': P['number'],                     # root          Style
+    b'SZ': P['number'],                     # root          Size
+    b'TB': P['point_elist'],                # -             Territory Black
+    b'TE': P['double'],                     # move          Tesuji
+    b'TM': P['real'],                       # game-info     Timelimit
+    b'TR': P['point_list'],                 # -             Triangle
+    b'TW': P['point_elist'],                # -             Territory White
+    b'UC': P['double'],                     # -             Unclear pos
+    b'US': P['simpletext'],                 # game-info     User
+    b'V': P['real'],                        # -             Value
+    b'VW': P['point_elist'],                # - [inherit]   View
+    b'W': P['move'],                        # move          White
+    b'WL': P['real'],                       # move          White time left
+    b'WR': P['simpletext'],                 # game-info     White rank
+    b'WT': P['simpletext'],                 # game-info     White team
 }
 _text_property_type = P['text']
 
