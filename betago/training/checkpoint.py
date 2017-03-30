@@ -1,11 +1,10 @@
+from __future__ import absolute_import
 import os
 
 import h5py
-from keras import backend as K
-from keras.models import Sequential, model_from_json
+from keras.models import Sequential
 from keras.optimizers import Adadelta
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Conv2D, ZeroPadding2D
+from keras.layers.core import Dense, Activation
 
 from . import kerashack
 
@@ -16,6 +15,7 @@ __all__ = [
 
 
 class TrainingRun(object):
+
     def __init__(self, filename, model, epochs_completed, chunks_completed, num_chunks):
         self.filename = filename
         self.model = model

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import copy
 import random
 from itertools import chain, product
@@ -9,6 +11,7 @@ import numpy as np
 from . import scoring
 from .dataloader.goboard import GoBoard
 from .processor import ThreePlaneProcessor
+from six.moves import range
 
 
 class HTTPFrontend(object):
@@ -16,6 +19,7 @@ class HTTPFrontend(object):
     HTTPFrontend is a simple Flask app served on localhost:8080, exposing a REST API to predict
     go moves.
     '''
+
     def __init__(self, bot, port=8080):
         self.bot = bot
         self.port = port
@@ -58,12 +62,12 @@ class HTTPFrontend(object):
             col = content['i']
             row = content['j']
             print('Received move:')
-            print(col, row)
+            print((col, row))
             self.bot.apply_move('b', (row, col))
 
             bot_row, bot_col = self.bot.select_move('w')
             print('Prediction:')
-            print(bot_col, bot_row)
+            print((bot_col, bot_row))
             result = {'i': bot_col, 'j': bot_row}
             json_result = jsonify(**result)
             return json_result
@@ -73,6 +77,7 @@ class HTTPFrontend(object):
 
 class GoModel(object):
     '''Tracks a board and selects moves.'''
+
     def __init__(self, model, processor):
         '''
         Parameters:
@@ -97,7 +102,6 @@ class GoModel(object):
     def select_move(self, bot_color):
         ''' Select a move for the bot'''
         return NotImplemented
-
 
 
 class KerasBot(GoModel):
@@ -137,7 +141,8 @@ class KerasBot(GoModel):
     def _model_moves(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
-        X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
+        X, label = self.processor.feature_and_label(
+            bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
         # Generate bot move.
@@ -186,7 +191,8 @@ class RandomizedKerasBot(GoModel):
     def _model_moves(self, bot_color):
         # Turn the board into a feature vector.
         # The (0, 0) is for generating the label, which we ignore.
-        X, label = self.processor.feature_and_label(bot_color, (0, 0), self.go_board, self.num_planes)
+        X, label = self.processor.feature_and_label(
+            bot_color, (0, 0), self.go_board, self.num_planes)
         X = X.reshape((1, X.shape[0], X.shape[1], X.shape[2]))
 
         # Generate moves from the keras model.
@@ -209,6 +215,7 @@ class IdiotBot(GoModel):
     '''
     Play random moves, like a good 30k bot.
     '''
+
     def __init__(self, model=None, processor=ThreePlaneProcessor()):
         super(IdiotBot, self).__init__(model=model, processor=processor)
 
@@ -217,8 +224,11 @@ class IdiotBot(GoModel):
 
     def select_move(self, bot_color):
         move = get_first_valid_move(
-            self.go_board, bot_color,
-            generate_randomized(all_empty_points(self.go_board)))
+            self.go_board,
+            bot_color,
+            # TODO: this function is gone. retrieve it.
+            generate_randomized(all_empty_points(self.go_board))
+        )
 
         if move is not None:
             self.go_board.apply_move(bot_color, move)
@@ -243,7 +253,7 @@ def generate_in_random_order(point_list):
 def all_empty_points(board):
     """Return all empty positions on the board."""
     empty_points = []
-    for point in product(range(board.board_size), range(board.board_size)):
+    for point in product(list(range(board.board_size)), list(range(board.board_size))):
         if point not in board.board:
             empty_points.append(point)
     return empty_points

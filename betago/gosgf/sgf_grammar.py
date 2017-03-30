@@ -20,6 +20,7 @@ values should pass is_valid_property_value().
 Adapted from gomill by Matthew Woodcraft, https://github.com/mattheww/gomill
 """
 
+from __future__ import absolute_import
 import re
 import string
 
@@ -58,6 +59,7 @@ def is_valid_property_identifier(s):
     """
     return bool(_propident_re.search(s))
 
+
 def is_valid_property_value(s):
     """Check whether 's' is a well-formed PropValue.
 
@@ -68,6 +70,7 @@ def is_valid_property_value(s):
 
     """
     return bool(_propvalue_re.search(s))
+
 
 def tokenise(s, start_position=0):
     """Tokenise a string containing SGF data.
@@ -115,6 +118,7 @@ def tokenise(s, start_position=0):
                     break
     return result, i
 
+
 class Coarse_game_tree(object):
     """An SGF GameTree.
 
@@ -130,8 +134,9 @@ class Coarse_game_tree(object):
 
     """
     def __init__(self):
-        self.sequence = [] # must be at least one node
-        self.children = [] # may be empty
+        self.sequence = []  # must be at least one node
+        self.children = []  # may be empty
+
 
 def _parse_sgf_game(s, start_position):
     """Common implementation for parse_sgf_game and parse_sgf_games."""
@@ -197,6 +202,7 @@ def _parse_sgf_game(s, start_position):
     assert index == len(tokens)
     return variation, end_position
 
+
 def parse_sgf_game(s):
     """Read a single SGF game from a string, returning the parse tree.
 
@@ -221,6 +227,7 @@ def parse_sgf_game(s):
     if game_tree is None:
         raise ValueError("no SGF data found")
     return game_tree
+
 
 def parse_sgf_collection(s):
     """Read an SGF game collection, returning the parse trees.
@@ -280,6 +287,7 @@ def block_format(pieces, width=79):
         lines.append(line)
     return b"\n".join(lines)
 
+
 def serialise_game_tree(game_tree, wrap=79):
     """Serialise an SGF game as a string.
 
@@ -305,8 +313,8 @@ def serialise_game_tree(game_tree, wrap=79):
             # Force FF to the front, largely to work around a Quarry bug which
             # makes it ignore the first few bytes of the file.
             for prop_ident, prop_values in sorted(
-                    properties.items(),
-                    key=lambda pair: (-(pair[0]==b"FF"), pair[0])):
+                    list(properties.items()),
+                    key=lambda pair: (-(pair[0] == b"FF"), pair[0])):
                 # Make a single string for each property, to get prettier
                 # block_format output.
                 m = [prop_ident]
@@ -342,15 +350,16 @@ def make_tree(game_tree, root, node_builder, node_adder):
     while to_build:
         node, game_tree, index = to_build.pop()
         if index < len(game_tree.sequence) - 1:
-            child = node_builder(node, game_tree.sequence[index+1])
+            child = node_builder(node, game_tree.sequence[index + 1])
             node_adder(node, child)
-            to_build.append((child, game_tree, index+1))
+            to_build.append((child, game_tree, index + 1))
         else:
             node._children = []
             for child_tree in game_tree.children:
                 child = node_builder(node, child_tree.sequence[0])
                 node_adder(node, child)
                 to_build.append((child, child_tree, 0))
+
 
 def make_coarse_game_tree(root, get_children, get_properties):
     """Construct a Coarse_game_tree from a node tree.
@@ -409,6 +418,7 @@ _split_compose_re = re.compile(
     r"( (?: [^\\:] | \\. )* ) :".encode('ascii'),
     re.VERBOSE | re.DOTALL)
 
+
 def parse_compose(s):
     """Split the parts of an SGF Compose value.
 
@@ -425,6 +435,7 @@ def parse_compose(s):
     if not m:
         return s, None
     return m.group(1), s[m.end():]
+
 
 def compose(s1, s2):
     """Construct a value of Compose value type.
@@ -444,6 +455,7 @@ else:
     _binary_maketrans = bytes.maketrans
 _whitespace_table = _binary_maketrans(b"\t\f\v", b"   ")
 _chunk_re = re.compile(r" [^\n\\]+ | [\n\\] ".encode('ascii'), re.VERBOSE)
+
 
 def simpletext_value(s):
     """Convert a raw SimpleText property value to the string it represents.
@@ -475,6 +487,7 @@ def simpletext_value(s):
             result.append(chunk)
     return b"".join(result)
 
+
 def text_value(s):
     """Convert a raw Text property value to the string it represents.
 
@@ -503,6 +516,7 @@ def text_value(s):
             result.append(chunk)
     return b"".join(result)
 
+
 def escape_text(s):
     """Convert a string to a raw Text property value that represents it.
 
@@ -517,4 +531,3 @@ def escape_text(s):
 
     """
     return s.replace(b"\\", b"\\\\").replace(b"]", b"\\]")
-

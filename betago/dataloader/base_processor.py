@@ -2,6 +2,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import gc
 import glob
@@ -26,7 +27,7 @@ def worker(jobinfo):
         clazz, dir_name, num_planes, zip_file, data_file_name, game_list = jobinfo
         clazz(dir_name, num_planes).process_zip(dir_name, zip_file, data_file_name, game_list)
     except (KeyboardInterrupt, SystemExit):
-        raise('>>> Exiting child process.')
+        raise Exception('>>> Exiting child process.')
 
 
 class DataGenerator(object):
@@ -36,7 +37,7 @@ class DataGenerator(object):
         self.samples = samples
         self.num_samples = None
 
-    def get_num_samples(self, batch_size=128, nb_classes=19*19):
+    def get_num_samples(self, batch_size=128, nb_classes=19 * 19):
         if self.num_samples is not None:
             return self.num_samples
         else:
@@ -63,7 +64,7 @@ class DataGenerator(object):
                     yield X_batch, y_batch
             gc.collect()
 
-    def generate(self, batch_size=128, nb_classes=19*19):
+    def generate(self, batch_size=128, nb_classes=19 * 19):
         while True:
             for item in self._generate(batch_size=batch_size, nb_classes=nb_classes):
                 yield item
@@ -250,7 +251,7 @@ class GoBaseProcessor(object):
                         first_move_done = True
                 total_examples = total_examples + num_moves
             else:
-                raise(name + ' is not a valid sgf')
+                raise ValueError(name + ' is not a valid sgf')
         return total_examples
 
 
@@ -311,7 +312,7 @@ class GoDataProcessor(GoBaseProcessor):
                         go_board.apply_move(color, (row, col))
                         first_move_done = True
             else:
-                raise(name + ' is not a valid sgf')
+                raise ValueError(name + ' is not a valid sgf')
 
         feature_file_base = dir_name + '/' + data_file_name + '_features_%d'
         label_file_base = dir_name + '/' + data_file_name + '_labels_%d'
@@ -395,7 +396,7 @@ class GoFileProcessor(GoBaseProcessor):
         headerLine = headerLine + '-bpp=' + str(bits_per_pixel)
         print(headerLine)
         headerLine = headerLine + "\0\n"
-        headerLine = headerLine + chr(0) * (1024-len(headerLine))
+        headerLine = headerLine + chr(0) * (1024 - len(headerLine))
         data_file.write(headerLine)
 
     def process_zip(self, dir_name, zip_file_name, data_file_name, game_list):
@@ -438,7 +439,7 @@ class GoFileProcessor(GoBaseProcessor):
                         move_idx = move_idx + 1
                         first_move_done = True
             else:
-                raise(name + ' is not a valid sgf')
+                raise ValueError(name + ' is not a valid sgf')
         data_file.write('END')
         data_file.close()
 
@@ -480,7 +481,7 @@ class GoFileProcessor(GoBaseProcessor):
             single_dat.read(1024)
             data = single_dat.read()
             if data[-3:] != 'END':
-                raise('Invalid file, doesnt end with END: ' + file_path)
+                raise Exception('Invalid file, doesnt end with END: ' + file_path)
             consolidated_file.write(data[:-3])
             single_dat.close()
         consolidated_file.write('END')

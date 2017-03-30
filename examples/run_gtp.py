@@ -1,7 +1,5 @@
 from __future__ import print_function
 import yaml
-import os
-import webbrowser
 
 from keras.models import model_from_yaml
 from betago.model import KerasBot

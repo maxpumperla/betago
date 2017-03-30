@@ -5,6 +5,7 @@ This is intended for use with SGF FF[4]; see http://www.red-bean.com/sgf/
 Adapted from gomill by Matthew Woodcraft, https://github.com/mattheww/gomill
 """
 
+from __future__ import absolute_import
 import datetime
 
 from . import sgf_grammar
@@ -30,6 +31,7 @@ class Node(object):
     Changing the SZ property isn't allowed.
 
     """
+
     def __init__(self, property_map, presenter):
         # Map identifier (PropIdent) -> nonempty list of raw values
         self._property_map = property_map
@@ -61,7 +63,7 @@ class Node(object):
         Returns a list of property identifiers, in unspecified order.
 
         """
-        return self._property_map.keys()
+        return list(self._property_map.keys())
 
     def get_raw_list(self, identifier):
         """Return the raw values of the specified property.
@@ -108,7 +110,6 @@ class Node(object):
         """
         return self._property_map
 
-
     def _set_raw_list(self, identifier, values):
         if identifier == b"SZ" and \
                 values != [str(self._presenter.size).encode(self._presenter.encoding)]:
@@ -124,7 +125,6 @@ class Node(object):
         if identifier == b"SZ" and self._presenter.size != 19:
             raise ValueError("changing size is not permitted")
         del self._property_map[identifier]
-
 
     def set_raw_list(self, identifier, values):
         """Set the raw values of the specified property.
@@ -167,7 +167,6 @@ class Node(object):
         if not sgf_grammar.is_valid_property_value(value):
             raise ValueError("ill-formed raw property value")
         self._set_raw_list(identifier, [value])
-
 
     def get(self, identifier):
         """Return the interpreted value of the specified property.
@@ -322,6 +321,7 @@ class Node(object):
 
     def __str__(self):
         encoding = self.get_encoding()
+
         def format_property(ident, values):
             return ident.decode(encoding) + "".join(
                 "[%s]" % s.decode(encoding) for s in values)
@@ -348,6 +348,7 @@ class Tree_node(Node):
       parent -- the nodes's parent Tree_node (None for the root node)
 
     """
+
     def __init__(self, parent, properties):
         self.owner = parent.owner
         self.parent = parent
@@ -449,16 +450,20 @@ class Tree_node(Node):
             raise KeyError
         return node.get(identifier)
 
+
 class _Root_tree_node(Tree_node):
     """Variant of Tree_node used for a game root."""
+
     def __init__(self, property_map, owner):
         self.owner = owner
         self.parent = None
         self._children = []
         Node.__init__(self, property_map, owner.presenter)
 
+
 class _Unexpanded_root_tree_node(_Root_tree_node):
     """Variant of _Root_tree_node used with 'loaded' Sgf_games."""
+
     def __init__(self, owner, coarse_tree):
         _Root_tree_node.__init__(self, coarse_tree.sequence[0], owner)
         self._coarse_tree = coarse_tree
@@ -619,13 +624,12 @@ class Sgf_game(object):
             raise ValueError("unsupported charset: %r" %
                              self.root.get_raw_list(b"CA"))
         coarse_tree = sgf_grammar.make_coarse_game_tree(
-            self.root, lambda node:node, Node.get_raw_property_map)
+            self.root, lambda node: node, Node.get_raw_property_map)
         serialised = sgf_grammar.serialise_game_tree(coarse_tree, wrap)
         if encoding == self.root.get_encoding():
             return serialised
         else:
             return serialised.decode(self.root.get_encoding()).encode(encoding)
-
 
     def get_property_presenter(self):
         """Return the property presenter.
@@ -784,7 +788,7 @@ class Sgf_game(object):
         """
         try:
             return self.root.get(
-                {'b' : b'PB', 'w' : b'PW'}[colour]).decode(self.presenter.encoding)
+                {'b': b'PB', 'w': b'PW'}[colour]).decode(self.presenter.encoding)
         except KeyError:
             return None
 
@@ -814,4 +818,3 @@ class Sgf_game(object):
         if date is None:
             date = datetime.date.today()
         self.root.set('DT', date.strftime("%Y-%m-%d"))
-

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import copy
 import itertools
 import json
@@ -5,6 +7,7 @@ import json
 from .archive import SGFLocator, find_sgfs, tarball_iterator
 from ..dataloader.goboard import GoBoard
 from ..gosgf import Sgf_game
+from six.moves import range
 
 __all__ = [
     'CorpusIndex',
@@ -87,8 +90,8 @@ class CorpusIndex(object):
                         if move is not None:
                             board.apply_move(color, move)
                 except ValueError:
-                    print("Invalid SGF data, skipping game record %s" % (sgf,))
-                    print("Board was:\n%s" % (board,))
+                    print(("Invalid SGF data, skipping game record %s" % (sgf,)))
+                    print(("Board was:\n%s" % (board,)))
 
     def _generate_games(self, physical_file):
         with tarball_iterator(physical_file) as tarball:

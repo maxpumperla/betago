@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 import sys
 
 from . import command, response
-from .board import *
+from .board import gtp_position_to_coords, coords_to_gtp_position
 from ..dataloader.goboard import GoBoard
 
 __all__ = [
@@ -22,6 +23,7 @@ class GTPFrontend(object):
      - Only supports fixed handicaps.
      - When white passes, black will pass too.
     """
+
     def __init__(self, bot):
         self.bot = bot
         self._input = sys.stdin
