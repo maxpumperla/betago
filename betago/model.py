@@ -55,16 +55,14 @@ class HTTPFrontend(object):
                     # Get the cell value
                     cell = str(self.bot.go_board.board.get((col, row)))
                     # Replace values with numbers
+                    # Value will be be 'w' 'b' or None
                     cell = cell.replace("None", "0")
-                    cell = cell.replace("Black", "1")
-                    cell = cell.replace("White", "2")
                     cell = cell.replace("b", "1")
                     cell = cell.replace("w", "2")
                     # Add cell to row
                     board_row[col] = int(cell) # must be an int
                 # Add row to board
                 board[row] = board_row
-            # board = np.array(board).tolist() # only needed for arrays
             board_init = str(board) # lazy convert list to JSON
             
             return open("ui/demoBot.html").read().replace('"__i__"', 'var boardInit = ' + board_init) # output the modified HTML file
