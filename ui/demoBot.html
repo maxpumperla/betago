@@ -26,8 +26,9 @@
 
   <script type="text/javascript" src="dist/jgoboard-latest.js"></script>
   <script type="text/javascript" src="large/board.js"></script>
+  <script type="text/javascript">"__i__";</script>
   <script type="text/javascript">
-    /*global JGO*/
+    /*global JGO boardInit*/
     var jboard = new JGO.Board(19);
     var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
     var player = JGO.BLACK; // next player
@@ -36,6 +37,16 @@
     var lastHover = false,
       lastX = -1,
       lastY = -1; // hover helper vars
+  
+    // Check for embedded game data
+    if (boardInit) {
+      // Set the board
+      var boardRaw = jboard.getRaw(); // Use current state (blank) as a template
+      boardRaw.stones = boardInit; // Add in our stone data
+      jboard.setRaw(boardRaw); // Set it and forget it®
+    } else {
+      // alert that this data is missing
+    }
 
     function playMove(coord, player, ko, success, failure) {
       success = success || function() {};
