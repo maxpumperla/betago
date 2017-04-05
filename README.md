@@ -1,4 +1,4 @@
-# BetaGo [![Build Status](https://travis-ci.org/maxpumperla/betago.svg?branch=master)](https://travis-ci.org/maxpumperla/betago) [![PyPI version](https://badge.fury.io/py/betago.svg)](https://badge.fury.io/py/betago) 
+# BetaGo [![Build Status](https://travis-ci.org/maxpumperla/betago.svg?branch=master)](https://travis-ci.org/maxpumperla/betago) [![PyPI version](https://badge.fury.io/py/betago.svg)](https://badge.fury.io/py/betago)
 *So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!*
 
 ![betago-demo](betago.gif)
@@ -7,7 +7,7 @@ BetaGo lets you run your own Go engine. It downloads Go games for you, preproces
 
 ## Getting started
 
-Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays a reasonable moves, but is still very weak.
+Test BetaGo by running the following commands. It should start a playable demo in your browser! This bot plays reasonable moves, but is still rather weak.
 
 ### Prerequisites
 
@@ -16,7 +16,7 @@ Test BetaGo by running the following commands. It should start a playable demo i
 sudo apt-get install -y python-dev python-pip python-virtualenv gfortran libhdf5-dev pkg-config liblapack-dev libblas-dev
 ```
 #### Mac
-On a Mac we recommend using homebrew to install HDF5 first 
+On a Mac we recommend using homebrew to install HDF5 first
 ```{bash}
 brew tap homebrew/science
 brew install hdf5
@@ -31,6 +31,15 @@ pip install betago
 git clone https://github.com/maxpumperla/betago
 cd betago
 python run_demo.py
+```
+
+## Running betago with docker
+
+After installing docker and cloning betago, run the following commands to run the demo
+```{bash}
+cd betago
+docker build -t betago .
+docker run -p 8080:8080 betago
 ```
 
 ## Contribute
