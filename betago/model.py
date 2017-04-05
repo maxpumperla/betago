@@ -50,7 +50,32 @@ class HTTPFrontend(object):
 
         @app.route('/')
         def home():
-            return open("ui/demoBot.html").read()
+            # Inject game data into HTML
+            board_init = 'initialBoard = ""' # backup variable
+            board = {}
+            for row in range(19):
+                board_row = {}
+                for col in range(19):
+                    # Get the cell value
+                    cell = str(self.bot.go_board.board.get((col, row)))
+                    # Replace values with numbers
+                    # Value will be be 'w' 'b' or None
+                    cell = cell.replace("None", "0")
+                    cell = cell.replace("b", "1")
+                    cell = cell.replace("w", "2")
+                    # Add cell to row
+                    board_row[col] = int(cell) # must be an int
+                # Add row to board
+                board[row] = board_row
+            board_init = str(board) # lazy convert list to JSON
+            
+            return open("ui/demoBot.html").read().replace('"__i__"', 'var boardInit = ' + board_init) # output the modified HTML file
+
+        @app.route('/sync', methods=['GET', 'POST'])
+        def exportJSON():
+            export = {}
+            export["hello"] = "yes?"
+            return jsonify(**export)
 
         @app.route('/prediction', methods=['GET', 'POST'])
         def next_move():
