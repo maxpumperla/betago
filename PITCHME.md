@@ -8,11 +8,11 @@ Hello!
 Hola!
 
 ---
-### Test multi-col
+# Test multi-col
 
 <div class="slide-wrapper">
   <div class="left-image">
-      ![Logo](ear_reddening.png)
+      <img src="ear_reddening.png">
   </div>
   <div class="right-text">
     <p>Random Text</p>
