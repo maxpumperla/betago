@@ -1,5 +1,8 @@
 Hello!
 
+![Logo](ear_reddening.jpg)
+
+
 +++
 
 Hola!
