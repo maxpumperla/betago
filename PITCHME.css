@@ -3,11 +3,11 @@ p {
   margin: 0
 }
 .slide-wrapper {
+  height: 33%;
   display: inline-block
 }
 .left-image,
 .right-text {
-  width: 50%;
   display: inline-block;
   vertical-align: middle
 }
