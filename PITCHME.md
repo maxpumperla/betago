@@ -1,11 +1,25 @@
 Hello!
-
-![Logo](ear_reddening.png)
-
+---?image=ear_reddening.png
+<!-- ![ear_reddening](ear_reddening.png) -->
+<!-- <div style="width">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
+</div> -->
 
 +++
 
 Hola!
+
+<!-- ---
+# Test multi-col
+
+<div class="slide-wrapper">
+  <div class="left-image">
+      <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
+  </div>
+  <div class="right-text">
+    <p>Random Text</p>
+  </div>
+</div> -->
 
 ---
 

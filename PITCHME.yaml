@@ -13,6 +13,6 @@ highlight : monokai
 
 slide-number: true
 
-theme-override : PITCHME.css
+# theme-override : PITCHME.css
 
 # footnote : "© 2017 Dr. Max Pumperla"

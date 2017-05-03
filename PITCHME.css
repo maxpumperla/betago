@@ -1,0 +1,17 @@
+body,
+p {
+  margin: 0
+}
+.slide-wrapper {
+  width: 80%;
+  display: inline-block
+}
+.left-image,
+.right-text {
+  width: 20%;
+  display: inline-block;
+  vertical-align: middle
+}
+img {
+  display: block
+}
