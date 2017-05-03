@@ -1,17 +1,21 @@
-body,
+/*body,
 p {
   margin: 0
-}
+}*/
 .slide-wrapper {
-  width: 80%;
+  /*width: 80%;*/
   display: inline-block
 }
-.left-image,
-.right-text {
+.left-image {
   width: 20%;
   display: inline-block;
   vertical-align: middle
 }
-img {
-  display: block
+.right-text {
+  width: 70%;
+  display: inline-block;
+  vertical-align: middle
 }
+/*img {
+  display: block
+}*/
