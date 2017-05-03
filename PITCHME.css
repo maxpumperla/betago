@@ -3,7 +3,7 @@ p {
   margin: 0
 }
 .slide-wrapper {
-  height: 33%;
+  width: 80%;
   display: inline-block
 }
 .left-image,
