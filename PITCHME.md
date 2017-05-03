@@ -8,6 +8,20 @@ Hello!
 Hola!
 
 ---
+# Test multi-col
+
+<div class="slide-wrapper">
+  <div class="left-image">
+    <a href="#">
+      <img src="https://github.com/maxpumperla/betago/blob/hamburg-ai/ear_reddening.png">
+    </a>
+  </div>
+  <div class="right-text">
+    <p>Random Text</p>
+  </div>
+</div>
+
+---
 
 Goodbye!
 

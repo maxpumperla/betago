@@ -1,0 +1,12 @@
+.slide-wrapper {
+  width: 33%;
+  display: inline-block
+}
+.left-image,
+.right-text {
+  display: inline-block;
+  vertical-align: middle
+}
+img {
+  display: block
+}
