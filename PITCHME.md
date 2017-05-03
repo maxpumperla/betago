@@ -1,5 +1,6 @@
 Hello!
 ---?image=ear_reddening.png
+## Test caption
 <!-- ![ear_reddening](ear_reddening.png) -->
 <!-- <div style="width">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
