@@ -16,7 +16,7 @@
 - JavaScript |
 - Kotlin     |
 - Go         |
-- Scala      |
+- ![Test](ear_reddening.png)      |
 
 ---
 
