@@ -16,7 +16,7 @@
 - JavaScript |
 - Kotlin     |
 - Go         |
-- ![Test](ear_reddening.png)      |
+- ![ear_reddening](https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png)      |
 
 ---
 
