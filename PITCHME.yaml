@@ -1,1 +1,16 @@
 mathjax : TeX-MML-AM_HTMLorMML-full
+
+# background : assets/bg.jpg
+
+# background-size : cover # auto, contain
+
+# Logo will be in top-left
+# logo : assets/logo.png
+
+# charts : true
+
+highlight : monokai
+
+slide-number: true
+
+footnote : "© 2017 Dr. Max Pumperla"
