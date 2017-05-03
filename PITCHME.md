@@ -12,9 +12,7 @@ Hola!
 
 <div class="slide-wrapper">
   <div class="left-image">
-    <a href="#">
-      <img src="https://github.com/maxpumperla/betago/blob/hamburg-ai/ear_reddening.png">
-    </a>
+      ![Logo](redmond_irritating.png)
   </div>
   <div class="right-text">
     <p>Random Text</p>
