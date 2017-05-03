@@ -15,7 +15,9 @@ Hola!
       <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
   </div>
   <div class="right-text">
-    <p class="text">Random Text</p>
+    - Test
+    - A
+    - B
   </div>
 </div>
 
