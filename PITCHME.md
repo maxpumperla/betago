@@ -1,6 +1,6 @@
 Hello!
 
-![Logo](ear_reddening.jpg)
+![Logo](ear_reddening.png)
 
 
 +++
