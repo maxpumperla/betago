@@ -12,10 +12,10 @@ Hola!
 
 <div class="slide-wrapper">
   <div class="left-image">
-      <img src="ear_reddening.png">
+      <img src="https://github.com/maxpumperla/betago/blob/hamburg-ai/ear_reddening.png">
   </div>
   <div class="right-text">
-    <p>Random Text</p>
+    <p class="text">Random Text</p>
   </div>
 </div>
 
