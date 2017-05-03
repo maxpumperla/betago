@@ -1,7 +1,6 @@
 Hello!
 
-<img src="https://github.com/maxpumperla/betago/blob/hamburg-ai/ear_reddening.png" height="24" width="48">
-<!-- ![Logo](ear_reddening.png | width=100) -->
+![Logo](ear_reddening.png)
 
 
 +++
