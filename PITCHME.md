@@ -12,7 +12,7 @@ Hola!
 
 <div class="slide-wrapper">
   <div class="left-image">
-      ![Logo](redmond_irritating.png)
+      ![Logo](ear_reddening.png)
   </div>
   <div class="right-text">
     <p>Random Text</p>
