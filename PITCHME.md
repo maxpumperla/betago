@@ -8,7 +8,7 @@ Hello!
 Hola!
 
 ---
-# Test multi-col
+### Test multi-col
 
 <div class="slide-wrapper">
   <div class="left-image">
