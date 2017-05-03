@@ -5,7 +5,7 @@ mathjax : TeX-MML-AM_HTMLorMML-full
 # background-size : cover # auto, contain
 
 # Logo will be in top-left
-logo : betago_logo.png
+# logo : betago_logo.png
 
 # charts : true
 
