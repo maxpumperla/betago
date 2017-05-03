@@ -7,7 +7,7 @@ Hello!
 
 Hola!
 
----
+<!-- ---
 # Test multi-col
 
 <div class="slide-wrapper">
@@ -17,7 +17,7 @@ Hola!
   <div class="right-text">
     <p class="text">Random Text</p>
   </div>
-</div>
+</div> -->
 
 ---
 
