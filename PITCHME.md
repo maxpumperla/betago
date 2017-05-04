@@ -1,13 +1,13 @@
 ## The principles behind super-human level computer Go
 ---
 
-- Introduction to Go in two moves
-- Tree search |
-- Supervised Learning |
-- Reinforcement Learning |
-- AlphaGo: combining all |
-- betago demo |
-- Conclusion |
+### Introduction to Go in two moves
+### Tree search
+### Supervised Learning
+### Reinforcement Learning
+### AlphaGo: combining all
+### betago demo
+### Conclusion
 
 ---
 
