@@ -5,9 +5,9 @@
 - Tree search |
 - Supervised Learning |
 - Reinforcement Learning |
-- AlphaGo: combining all
-- betago demo
-- Conclusion
+- AlphaGo: combining all |
+- betago demo |
+- Conclusion |
 
 ---
 
@@ -25,7 +25,7 @@
 <!-- - Shusaku vs. Inseki, game 2 (1846) -->
 - Among the most famous moves in history
 - Move "feels right" |
-- There are many local patterns to respect
+- There are many local patterns to respect |
 - Complex interaction with surrounding stones |
 - Value depends on exact board position |
 - Hard to evaluate the position itself |
@@ -54,8 +54,9 @@
 - Alternating two-player game
 - Game of perfect information |
 - Zero-sum game |
-- breadth $b \approx 250$
-- depth $d \approx 150$
+- There is an optimal _value function_ $v^{\ast}(s)$ for each state $s$
+- breadth $b \approx 250$ |
+- depth $d \approx 150$ |
 
 +++
 
