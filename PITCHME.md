@@ -200,7 +200,7 @@
 - i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v_{T}(s))$
 - $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$
 - Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
-- Combine rollouts $z_L$ from $p_T$ and value network $v_{\theta}(s)$ as follows:
+- Combine rollouts $z_L$ from $p_T$ and value network $v_{\theta} (s)$ as follows:
 - $V(s_{L}) = (1 - \lambda) v_{\theta}(s) + \lambda z_L$
 
 ---
