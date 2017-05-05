@@ -196,9 +196,10 @@
 +++
 
 ## How? Expert slide II
-- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$ foo
+- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
 <!-- - i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta}(z-v_{\theta}(s))$ -->
-- Combine rollouts $z_{ L }$ from $p_{ \pi }$
+- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
+- Combine rollouts $z_{L}$ from $p_{\pi}$
 - and value network $v_{\theta}(s)$ as follows:
 - $V(s_{L}) = (1-\lambda)v_{\theta}(s) + \lambda z_{L}$
 
