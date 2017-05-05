@@ -187,8 +187,8 @@
 
 ## How? Expert slide I
 - policy $p_{\sigma}$ computed by 13-layer conv net with ReLU activations
+- Use this to initialize RL policy $p_{\rho}$
 - also learn a smaller policy net $p_{\pi}$ for fast rollouts
-- Use $p_{\sigma}$ to initialize RL policy $p_{\rho}$
 - Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
 - Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$
 - Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$
