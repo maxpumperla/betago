@@ -4,22 +4,13 @@
 ## Why?
 
 - Google's AlphaGo was announced 2016
+- Advancement 10+ years ahead of its time |
 - Often talked about, but rarely how it works |
 - Few lessons to be learnt |
 - The game itself is beautiful |
-- Disclaimer: Think of chess or Tic Tac Toe if you like
+- Disclaimer: Think of chess or Tic Tac Toe if you like |
 
 ---
-
-<!-- ### Introduction to Go in two moves
-### Tree search
-### Supervised Learning
-### Reinforcement Learning
-### AlphaGo: combining all
-### betago demo
-### Conclusion
-
---- -->
 
 ## Introduction to Go in two moves
 
@@ -52,7 +43,8 @@
 - Very creative move by the computer
 - Went against conventional wisdom |
 - Unlikely to be played by professionals |
-- Was initially thought to be a mistake by the machine
+- Was initially thought to be a mistake by the machine |
+- Opened new ways to think about the game |
 
 ---
 
@@ -77,7 +69,7 @@
 - No luck involved (perfect information game) |
 - What's good for me is bad for you (zero-sum) |
 - The current position is all that counts, no matter how I ended up there (Markov property) |
-- There is an optimal _value function_ $v^{\ast}(s)$ for each position/state $s$ |
+- There is an optimal value function $v^{\ast}(s)$ for each position/state $s$ |
 - We call this an alternating Markov game |
 
 +++
@@ -89,13 +81,14 @@
 +++
 
 ## The perfect game of go (?)
-- In current position, evaluate all next moves (search the tree)
+- Evaluate all next moves (search the tree)
 - Choose the move that maximizes your result (likely win) |
 - Your opponent will choose the move that minimizes your result (likely loss) |
-- This tree search approach is called _minimax_ |
+- This tree search approach is called minimax |
 - Discard hopeless sub-trees |
 - Bound sub-trees by replacing them by $v^{\ast}(s)$ |
 - A sophisticated extension of this beat Kasparov in 1997 (alpha-beta pruning) |
+
 +++
 
 ## Well, but...
@@ -113,15 +106,86 @@
 
 ## What can we hope to learn?
 - What is my current position worth?
-- Learn a good _value function_ $v(s) \approx v^{\ast}(s)$ |
+- Learn a good value function $v(s) \approx v^{\ast}(s)$ |
 - What next move should I play? |
-- Learn a good _policy_ $P(a|s)$ |
+- Learn a good policy $P(a|s)$ |
 
 +++
 
----
-### Vanity slide
+## Move prediction (classically)
+- Feed an algorithm professional game data
+- For each board position, learn to predict the next move |
+- Need to carefully hand-craft features from raw data |
+- There's thousands of patterns to detect |
+- exceeds capacity of humans (feature engineering) and shallow algorithms (logistic regression, SVMs etc.) |
 
++++
+
+## Enter Deep Learning
+- Deep neural networks have been vastly successful in many applications
+- Really good at detecting hierarchical patterns/features (representation learning)
+- Can often feed raw data, no feature engineering needed
+- Convolutional networks particularly good at learning from spatial data
+- Note: will never be better than data
+
++++
+
+## AlphaGo's supervised Deep Learning
+<div style="width: 50%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/policy_value_networks.png">
+</div>
+
++++
+
+## BetaGo - a python Go bot
+
+- Currently supervised learning only, using [Keras](http://keras.io)
+- Check it out on [github](https://github.com/maxpumperla/betago)
+- Interactive demo available [here](https://betago.herokuapp.com)
 
 ---
-### Company slide
+
+## Reinforcement Learning
+<div style="width: 70%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/reinforcement.jpg">
+</div>
+
++++
+
+## Terminology
+- Know what states $s$ and actions $a$ are.
+- Can assign a reward function $r$, i.e. $+1$ for a win, $-1$ for a loss
+- Have seen policies and value functions already
+
++++
+
+## How can we use this?
+- Self-play: two agents playing against each other and learn
+- Can "warm start" move prediction by supervised learning
+- Can eventually supersede approach learning from historical data
+
+---
+## AlphaGo: Combining approaches
+- All three pillars have been there before
+- AlphaGo represents a very smart combination of these techniques
+- Incredible engineering achievement
+
++++
+
+## How? High level
+
++++
+
+## How? The expert slide
+
+---
+## Conclusion
+
+---
+## Bonus slides
+
++++
+
++++
+
++++
