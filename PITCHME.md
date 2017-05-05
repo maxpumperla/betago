@@ -185,13 +185,17 @@
 
 +++
 
-## How? Expert slide
+## How? Expert slide I
 - policy $p_{\sigma}$ computed by 13-layer conv net with ReLU activations
 - also learn a smaller policy net $p_{\pi}$ for fast rollouts
-- Use $p_{\sigma}$ to initialize RL policy $p_{\rho}
+- Use $p_{\sigma}$ to initialize RL policy $p_{\rho}$
 - Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
 - Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$
 - Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$
+
++++
+
+## How? Expert slide II
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$, i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v_{\theta}(s))$
 - Combine rollouts $z_L$ from $p_{\pi}$ and value network $v_{\theta}(s)$ as follows
 - $V(s_L) = (1-\lambda)v_{\theta}(s) + \lambda z_L$
