@@ -40,6 +40,12 @@
 
 +++
 
+<iframe width="420" height="315"
+src="https://www.youtube.com/watch?v=JNrXgpSEEIE?autoplay=1&start=40&end=60&version=3">
+</iframe>
+
++++
+
 - Very creative move by the computer
 - Went against conventional wisdom |
 - Unlikely to be played by professionals |
