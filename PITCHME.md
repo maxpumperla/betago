@@ -155,43 +155,40 @@
 
 ## Terminology
 - Know what states $s$ and actions $a$ are.
-- Can assign a reward function $r$: $+1$ for a win, $-1$ for a loss, otherwise $0$
-- Have seen policies and value functions already
+- Can assign a reward function $r$: $+1$ for a win, $-1$ for a loss, otherwise $0$ |
+- Have seen policies and value functions already |
 
 +++
 
 ## How can we use this?
 - Self-play: two agents playing against each other and learn
-- Can "warm start" move prediction by supervised learning
-- Can eventually supersede approach learning from historical data
+- Can "warm start" move prediction by supervised learning |
+- Can eventually supersede approach learning from historical data |
 
 ---
 ## AlphaGo: Combining approaches
-- All three pillars have been there before
-- AlphaGo represents a very smart combination of these techniques
-- Incredible engineering achievement
 
 +++
 
 ## How? High level
 - Learn a policy network from game data (move prediction)
-- Use this network as starting point for self-play
-- Let computer play against other versions of itself
-- Massive improvement already
-- Use this better network to derive a value network (position evaluation)
-- Do tree search. Choose move by considering:
-  - value function
-  - sampling rollouts using our policy network
+- Use this network as starting point for self-play |
+- Let computer play against other versions of itself |
+- Massive improvement already |
+- Use this better network to derive a value network (position evaluation) |
+- Do tree search. Choose move by considering: |
+  - value function |
+  - sampling rollouts using our policy network |
 
 +++
 
 ## How? Expert slide I
 - policy $p_{\sigma}$ computed by 13-layer conv net with ReLU activations
-- Use this to initialize RL policy $p_{\rho}$
-- also learn a smaller policy net $p_{\pi}$ for fast rollouts
-- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
-- Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$
-- Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$
+- Use this to initialize RL policy $p_{\rho}$ |
+- also learn a smaller policy net $p_{\pi}$ for fast rollouts |
+- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$ |
+- Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$ |
+- Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
 
 +++
 
@@ -199,17 +196,39 @@
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
 - i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$
 - Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
-- Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from $p_T$ as follows:
+- Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows:
 - $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$
+
++++
+<div style="width: 70%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/sl_to_rl.png">
+</div>
+
 
 ---
 ## Conclusion
+- All three pillars have been there before
+- AlphaGo represents a very smart combination of these techniques |
+- Incredible engineering achievement |
+- Techniques can be transferred |
+- At collectAI we are using DL and RL for debtor communication: |
+  - find right time to contact a person |
+  - in which tone to address a person |
+  - on which channel etc. |
 
 ---
 ## Bonus slides
 
 +++
+## Elo comparison
+<div style="width: 70%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/elo_comparison.png">
+</div>
 
 +++
+## AlphaGo performance
+<div style="width: 70%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/alphago_performance.png">
+</div>
 
 +++
