@@ -40,7 +40,7 @@
 
 +++
 
-![redmond_irritating](https://www.youtube.com/watch?v=JNrXgpSEEIE?autoplay=1&start=40&end=60&version=3")
+![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60&autoplay=1)
 
 +++
 
