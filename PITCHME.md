@@ -95,6 +95,7 @@
 - breadth $b \approx 250$, depth $d \approx 150$ |
 - A game has about $b^d$ moves, completely intractable |
 - Sampling guesses and keeping track of outcome can work (MCTS) |
+- "Randomly" playing out a full game is called rollout
 - Position evaluation in Go is extremely hard ($v^{\ast}(s)$?) |
 - MCTS methods have been state of the art in Go for a long time |
 
@@ -113,7 +114,7 @@
 +++
 
 ## Move prediction (classically)
-- Feed an algorithm professional game data
+- Feed an algorithm human game data
 - For each board position, learn to predict the next move |
 - Need to carefully hand-craft features from raw data |
 - There's thousands of patterns to detect |
@@ -154,7 +155,7 @@
 
 ## Terminology
 - Know what states $s$ and actions $a$ are.
-- Can assign a reward function $r$, i.e. $+1$ for a win, $-1$ for a loss
+- Can assign a reward function $r$: $+1$ for a win, $-1$ for a loss, otherwise $0$
 - Have seen policies and value functions already
 
 +++
@@ -173,10 +174,27 @@
 +++
 
 ## How? High level
+- Learn a policy network from game data (move prediction)
+- Use this network as starting point for self-play
+- Let computer play against other versions of itself
+- Massive improvement already
+- Use this better network to derive a value network (position evaluation)
+- Do tree search. Choose move by considering:
+  - value function
+  - sampling rollouts using our policy network
 
 +++
 
-## How? The expert slide
+## How? Expert slide
+- policy $p_{\sigma}$ computed by 13-layer conv net with ReLU activations
+- also learn a smaller policy net $p_{\pi}$ for fast rollouts
+- Use $p_{\sigma}$ to initialize RL policy $p_{\rho}
+- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
+- Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$
+- Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$
+- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$, i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v_{\theta}(s))$
+- Combine rollouts $z_L$ from $p_{\pi}$ and value network $v_{\theta}(s)$ as follows
+- $V(s_L) = (1-\lambda)v_{\theta}(s) + \lambda z_L$
 
 ---
 ## Conclusion
