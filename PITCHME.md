@@ -9,6 +9,8 @@
 - The game itself is beautiful |
 - Disclaimer: Think of chess or Tic Tac Toe if you like
 
+---
+
 <!-- ### Introduction to Go in two moves
 ### Tree search
 ### Supervised Learning
