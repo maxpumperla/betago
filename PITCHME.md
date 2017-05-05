@@ -60,7 +60,9 @@
 ---
 
 ## Tree search
-
+<div style="width: 50%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/chess-tree-search.png">
+</div>
 +++
 
 ## Some basics first
@@ -95,7 +97,7 @@
 - breadth $b \approx 250$, depth $d \approx 150$ |
 - A game has about $b^d$ moves, completely intractable |
 - Sampling guesses and keeping track of outcome can work (MCTS) |
-- "Randomly" playing out a full game is called rollout
+- "Randomly" playing out a full game is called rollout |
 - Position evaluation in Go is extremely hard ($v^{\ast}(s)$?) |
 - MCTS methods have been state of the art in Go for a long time |
 
