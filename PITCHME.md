@@ -126,10 +126,10 @@
 
 ## Enter Deep Learning
 - Deep neural networks have been vastly successful in many applications
-- Really good at detecting hierarchical patterns/features (representation learning)
-- Can often feed raw data, no feature engineering needed
-- Convolutional networks particularly good at learning from spatial data
-- Note: will never be better than data
+- Really good at detecting hierarchical patterns/features (representation learning) |
+- Can often feed raw data, no feature engineering needed |
+- Convolutional networks particularly good at learning from spatial data |
+- Note: will never be better than data |
 
 +++
 
@@ -196,10 +196,9 @@
 
 ## How? Expert slide II
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
-- i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$
-- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
-- Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows:
-- $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$
+- i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
+- Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
+- $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$ |
 
 +++
 <div style="width: 70%; display: inline-block">
