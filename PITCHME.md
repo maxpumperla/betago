@@ -197,7 +197,7 @@
 
 ## How? Expert slide II
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
-- i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta}(z-v_{\theta}(s))$
+- i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v_{T}(s))$
 - $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} z$
 - Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$
 - Combine rollouts $z_L$ from $p_T$ and value network $v_{\theta}(s)$ as follows:
