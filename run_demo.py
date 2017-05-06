@@ -23,12 +23,13 @@ with open(model_file, 'r') as f:
     model.load_weights(weight_file)
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--host', default='localhost', help='host to listen to')
 parser.add_argument('--port', '-p', type=int, default=8080,
                     help='Port the web server should listen on (default 8080).')
 args = parser.parse_args()
 
 # Open web frontend and serve model
-webbrowser.open('http://localhost:%d/' % (args.port,), new=2)
+webbrowser.open('http://{}:{}/'.format(args.host, args.port), new=2)
 go_model = KerasBot(model=model, processor=processor)
 go_server = HTTPFrontend(bot=go_model, port=args.port)
 go_server.run()
