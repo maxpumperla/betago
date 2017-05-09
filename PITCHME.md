@@ -20,7 +20,7 @@
 <figure>
 <div style="width: 50%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
-    <figcaption>ear reddening source</figcaption>
+    <figcaption style="font-size: 1em;">ear reddening source</figcaption>
 </div>
 </figure>
 
