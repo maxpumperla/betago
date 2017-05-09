@@ -1,11 +1,11 @@
 mathjax : TeX-MML-AM_HTMLorMML-full
 
-background : cai_bw.jpg
+# background : cai_bw.jpg
 
 # background-size : cover # auto, contain
 
 # Logo will be in top-left
-# logo : betago_logo.png
+logo : cai_bw.png
 
 # charts : true
 
