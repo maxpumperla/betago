@@ -18,9 +18,8 @@
 </div>
 
 +++
-
+![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60)
 <figure>
-  ![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60)
   <figcaption style="font-size: 16px;">https://www.youtube.com/embed/JNrXgpSEEIE</figcaption>
 </figure>
 
