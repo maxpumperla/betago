@@ -3,18 +3,15 @@
 
 ## Why?
 
-- Google's AlphaGo was announced 2016
-- Advancement 10+ years ahead of its time |
-- Often talked about, but rarely how it works |
-- Few lessons to be learnt |
-- The game itself is beautiful |
-- Disclaimer: Think of chess or Tic Tac Toe if you like |
+- AlphaGo often talked about, but rarely how it works
+- Learn to play go! |
+- Disclaimer |
 
 ---
 
-## Introduction to Go in two moves
+## Introduction to Go in one move
 
-+++
+<!-- +++
 
 ## Ear-reddening move
 <figure>
@@ -27,31 +24,33 @@
 
 +++
 
-<!-- - Shusaku vs. Inseki, game 2 (1846) -->
 - Among the most famous moves in history
 - Move "feels right" |
 - There are many local patterns to respect |
 - Complex interaction with surrounding stones |
 - Value depends on exact board position |
-- Hard to evaluate the position itself |
+- Hard to evaluate the position itself | -->
 
 +++
 
-## AlphaGo - Lee Sedol
 <div style="width: 50%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/redmond_irritating.png">
 </div>
 
 +++
 
-![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60)
+<figure>
+  ![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60)
+  <figcaption style="font-size: 16px;">https://www.youtube.com/embed/JNrXgpSEEIE</figcaption>
+</figure>
 
 +++
+## What's so special?
 
-- Very creative move by the computer
-- Went against conventional wisdom |
-- Unlikely to be played by professionals |
-- Was initially thought to be a mistake by the machine |
+### "It’s not a human move. I’ve never seen a human play this move.”
+
+- Thought to be a mistake at first
+- Very creative & extremely unconventional |
 - Opened new ways to think about the game |
 
 ---
@@ -62,8 +61,8 @@
 
 ## Three pillars
 - Tree search
-- Supervised Learning
-- Reinforcement Learning
+- Supervised Learning |
+- Reinforcement Learning |
 
 ---
 
