@@ -167,7 +167,7 @@
 - Do tree search using these networks |
 - Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
 - $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$, $\lambda \in [0, 1]$ |
-- Choose next actions according to $V(s_L)$, taking visit counts into account
+- Choose next actions according to $V(s_L)$, taking visit counts into account |
 
 
 ---
@@ -177,3 +177,11 @@
 - Read the paper, build your own bots! |
 - At collectAI we are using DL and RL for communication: |
 - when and how to contact a person |
+
+---
+
+# Thank you!
+
+##### Keep in touch:
+- [github.com/maxpumperla](github.com/maxpumperla)
+- [twitter.com/maxpumperla](twitter.com/maxpumperla)
