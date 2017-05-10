@@ -11,26 +11,6 @@
 
 ## Introduction to Go in one move
 
-<!-- +++
-
-## Ear-reddening move
-<figure>
-<div style="width: 50%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
-    <figcaption style="font-size: 16px;">ear reddening source</figcaption>
-</div>
-</figure>
-
-
-+++
-
-- Among the most famous moves in history
-- Move "feels right" |
-- There are many local patterns to respect |
-- Complex interaction with surrounding stones |
-- Value depends on exact board position |
-- Hard to evaluate the position itself | -->
-
 +++
 
 <div style="width: 50%; display: inline-block">
