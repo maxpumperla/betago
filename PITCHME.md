@@ -53,12 +53,11 @@
 
 ## Some basics first
 
-- Players take turns (alternating two-player game)
-- No luck involved (perfect information game) |
-- What's good for me is bad for you (zero-sum) |
-- The current position is all that counts, no matter how I ended up there (Markov property) |
-- There is an optimal value function $v^{\ast}(s)$ for each position/state $s$ |
-- We call this an alternating Markov game |
+- Alternating two-player game
+- Perfect information game |
+- Zero-sum game |
+- Markov property |
+- There is an optimal value function $v^{\ast}(s)$ for each state $s$ |
 
 +++
 ## Example: Evaluating Tic Tac Toe
@@ -69,28 +68,30 @@
 +++
 
 ## The perfect game of go (?)
-- Evaluate all next moves (search the tree)
-- Choose the move that maximizes your result (likely win) |
-- Your opponent will choose the move that minimizes your result (likely loss) |
-- This tree search approach is called minimax |
+- Evaluate all next moves
+- Choose move maximizing your result|
+- Opponent chooses move minimizing your result |
+- Minimax |
 - Discard hopeless sub-trees |
 - Bound sub-trees by replacing them by $v^{\ast}(s)$ |
-- A sophisticated extension of this beat Kasparov in 1997 (alpha-beta pruning) |
+- Extension beat Kasparov in 1997 |
 
 +++
 
 ## Well, but...
-- breadth $b \approx 250$, depth $d \approx 150$ |
-- A game has about $b^d$ moves, completely intractable |
+- Breadth $b \approx 250$, depth $d \approx 150$ |
+- Completely intractable, $b^d$ moves |
 - Sampling guesses and keeping track of outcome can work (MCTS) |
-- "Randomly" playing out a full game is called rollout |
+- "Randomly" playing out a full game is called _rollout_ |
 - Position evaluation in Go is extremely hard ($v^{\ast}(s)$?) |
 - MCTS methods have been state of the art in Go for a long time |
 
 ---
 
 ## Supervised learning
-
+<div style="width: 50%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/policy_value_networks.png">
+</div>
 +++
 
 ## What can we hope to learn?
@@ -103,34 +104,26 @@
 
 ## Move prediction (classically)
 - Feed an algorithm human game data
-- For each board position, learn to predict the next move |
-- Need to carefully hand-craft features from raw data |
-- There's thousands of patterns to detect |
-- exceeds capacity of humans (feature engineering) and shallow algorithms (logistic regression, SVMs etc.) |
+- For each $s$ predict the next move |
+- Carefully hand-craft features (thousands of patterns)|
+- exceeds capacity of humans and algorithms |
 
 +++
 
 ## Enter Deep Learning
-- Deep neural networks have been vastly successful in many applications
-- Really good at detecting hierarchical patterns/features (representation learning) |
-- Can often feed raw data, no feature engineering needed |
-- Convolutional networks particularly good at learning from spatial data |
-- Note: will never be better than data |
-
-+++
-
-## AlphaGo's supervised Deep Learning
-<div style="width: 50%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/policy_value_networks.png">
-</div>
+- Vastly successful in many applications
+- Representation learning |
+- Often no feature engineering |
+- Special architectures |
+- Note: bounded by data |
 
 +++
 
 ## BetaGo - a python Go bot
 
 - Currently supervised learning only, using [Keras](http://keras.io)
-- Check it out on [github](https://github.com/maxpumperla/betago)
-- Interactive demo available [here](https://betago.herokuapp.com)
+- Check it out on [github](https://github.com/maxpumperla/betago) |
+- Interactive demo available [here](https://betago.herokuapp.com) |
 
 ---
 
@@ -142,16 +135,17 @@
 +++
 
 ## Terminology
+- Have seen policies and value functions already |
 - Know what states $s$ and actions $a$ are.
 - Can assign a reward function $r$: $+1$ for a win, $-1$ for a loss, otherwise $0$ |
-- Have seen policies and value functions already |
+- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$ |
 
 +++
 
 ## How can we use this?
-- Self-play: two agents playing against each other and learn
-- Can "warm start" move prediction by supervised learning |
-- Can eventually supersede approach learning from historical data |
+- Self-play
+- Warm-start move prediction by supervised learning |
+- Note: eventually supersedes data |
 
 ---
 ## AlphaGo: Combining approaches
@@ -170,52 +164,27 @@
 
 +++
 
-## How? Expert slide I
-- policy $p_{\sigma}$ computed by 13-layer conv net with ReLU activations
-- Use this to initialize RL policy $p_{\rho}$ |
-- also learn a smaller policy net $p_{\pi}$ for fast rollouts |
-- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$ |
+## How? Part I
+- Policy network $p_{\sigma}$ from game data
+- Initialize RL policy $p_{\rho}$ |
+- Let $p_{\rho}$ play against older versions of itself |
+- Train smaller policy net $p_{\pi}$ for fast rollouts |
 - Updates using policy gradients $\Delta \rho \propto \frac{\partial log p_{\rho}(a_t | s_t)}{\partial \rho} z_t$ |
-- Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
 
 +++
 
-## How? Expert slide II
+## How? Part II
+- Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
 - i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
 - Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
 - $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$ |
 
-+++
-<div style="width: 70%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/sl_to_rl.png">
-</div>
-
 
 ---
 ## Conclusion
 - All three pillars have been there before
-- AlphaGo represents a very smart combination of these techniques |
+- Very smart combination of these techniques |
 - Incredible engineering achievement |
-- Techniques can be transferred |
-- At collectAI we are using DL and RL for debtor communication: |
-  - find right time to contact a person |
-  - in which tone to address a person |
-  - on which channel etc. |
-
----
-## Bonus slides
-
-+++
-## Elo comparison
-<div style="width: 70%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/elo_comparison.png">
-</div>
-
-+++
-## AlphaGo performance
-<div style="width: 70%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/alphago_performance.png">
-</div>
-
-+++
+- At collectAI we are using DL and RL for communication: |
+- when and how to contact a person |
