@@ -163,7 +163,8 @@
 
 ## How? Part II
 - Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
-- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$, update by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
+- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$ |
+- Updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
 - Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
 - $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$ |
 
