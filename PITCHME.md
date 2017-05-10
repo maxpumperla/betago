@@ -26,7 +26,7 @@
 +++
 ## What's so special?
 
-### "It’s not a human move. I’ve never seen a human play this move.”
+##### "It’s not a human move. I’ve never seen a human play this move.”
 
 - Thought to be a mistake at first
 - Very creative & extremely unconventional |
