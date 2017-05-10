@@ -164,15 +164,16 @@
 ## How? Part II
 - Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
 - Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$ |
-- Updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
+- Do tree search using these networks |
 - Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
-- $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$ |
+- $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$, $\lambda \in [0, 1]$ |
+- Choose next actions according to $V(s_L)$, taking visit counts into account
 
 
 ---
 ## Conclusion
 - All three pillars have been there before
-- Very smart combination of these techniques |
 - Incredible engineering achievement |
+- Read the paper, build your own bots! |
 - At collectAI we are using DL and RL for communication: |
 - when and how to contact a person |
