@@ -11,13 +11,12 @@
 
 ## Introduction to Go in one move
 
-+++
-
 <div style="width: 50%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/redmond_irritating.png">
 </div>
 
 +++
+
 ![redmond_irritating](https://www.youtube.com/embed/JNrXgpSEEIE?start=40&end=60)
 <figure>
   <figcaption style="font-size: 16px;">https://www.youtube.com/embed/JNrXgpSEEIE</figcaption>
@@ -28,7 +27,7 @@
 
 ##### "It’s not a human move. I’ve never seen a human play this move.”
 
-- Thought to be a mistake at first
+- Thought to be a mistake at first |
 - Very creative & extremely unconventional |
 - Opened new ways to think about the game |
 
@@ -46,9 +45,15 @@
 ---
 
 ## Tree search
-<div style="width: 50%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/chess-tree-search.png">
-</div>
+<figure>
+  <div style="width: 50%; display: inline-block">
+      <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/tictactoe.png">
+      <figcaption style="font-size: 16px;">http://www.cburch.com/cs/150/test/rfa/tictac-pre.png
+</figcaption>
+  </div>
+</figure>
+
+
 +++
 
 ## Some basics first
@@ -58,12 +63,6 @@
 - Zero-sum game |
 - Markov property |
 - There is an optimal value function $v^{\ast}(s)$ for each state $s$ |
-
-+++
-## Example: Evaluating Tic Tac Toe
-<div style="width: 50%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/tictactoe.png">
-</div>
 
 +++
 
@@ -89,9 +88,12 @@
 ---
 
 ## Supervised learning
-<div style="width: 50%; display: inline-block">
-    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/policy_value_networks.png">
-</div>
+<figure>
+  <div style="width: 50%; display: inline-block">
+      <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/policy_value_networks.png">
+      <figcaption style="font-size: 16px;">http://www.nature.com/nature/journal/v529/n7587/full/nature16961.html</figcaption>
+  </div>
+</figure>
 +++
 
 ## What can we hope to learn?
@@ -128,9 +130,12 @@
 ---
 
 ## Reinforcement Learning
-<div style="width: 70%; display: inline-block">
+<figure>
+  <div style="width: 70%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/reinforcement.jpg">
-</div>
+    <figcaption style="font-size: 16px;">http://web.stanford.edu/class/cs234/images/header2.png</figcaption>
+  </div>
+</figure>
 
 +++
 
