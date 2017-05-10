@@ -1,13 +1,16 @@
 ## The principles behind super-human level computer Go
----
-
-## Why?
-
-- AlphaGo often talked about, but rarely how it works
-- Learn to play go! |
-- Disclaimer |
 
 ---
+
+## Some basics first
+
+- Alternating two-player game
+- Perfect information game |
+- Zero-sum game |
+- Markov property |
+- There is an optimal value function $v^{\ast}(s)$ for each state $s$ |
+
++++
 
 ## Introduction to Go in one move
 
@@ -52,17 +55,6 @@
 </figcaption>
   </div>
 </figure>
-
-
-+++
-
-## Some basics first
-
-- Alternating two-player game
-- Perfect information game |
-- Zero-sum game |
-- Markov property |
-- There is an optimal value function $v^{\ast}(s)$ for each state $s$ |
 
 +++
 
