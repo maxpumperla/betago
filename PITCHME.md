@@ -82,7 +82,7 @@
 - Breadth $b \approx 250$, depth $d \approx 150$ |
 - Completely intractable, $b^d$ moves |
 - Sampling guesses and keeping track of outcome can work (MCTS) |
-- "Randomly" playing out a full game is called _rollout_ |
+- "Randomly" playing out a full game is called rollout |
 - Position evaluation in Go is extremely hard ($v^{\ast}(s)$?) |
 - MCTS methods have been state of the art in Go for a long time |
 
@@ -98,7 +98,7 @@
 - What is my current position worth?
 - Learn a good value function $v(s) \approx v^{\ast}(s)$ |
 - What next move should I play? |
-- Learn a good policy $P(a|s)$ |
+- Learn a good policy $p(a|s)$ |
 
 +++
 
@@ -122,8 +122,8 @@
 ## BetaGo - a python Go bot
 
 - Currently supervised learning only, using [Keras](http://keras.io)
-- Check it out on [github](https://github.com/maxpumperla/betago) |
-- Interactive demo available [here](https://betago.herokuapp.com) |
+- Check it out on [github](https://github.com/maxpumperla/betago)
+- Interactive demo available [here](https://betago.herokuapp.com)
 
 ---
 
@@ -136,9 +136,9 @@
 
 ## Terminology
 - Have seen policies and value functions already |
-- Know what states $s$ and actions $a$ are.
+- Know what states $s$ and actions $a$ are. |
 - Can assign a reward function $r$: $+1$ for a win, $-1$ for a loss, otherwise $0$ |
-- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t<T$ |
+- Outcome $z_t = \pm r(s_T)$ terminal reward at the end seen at $t$ |
 
 +++
 
@@ -149,18 +149,6 @@
 
 ---
 ## AlphaGo: Combining approaches
-
-+++
-
-## How? High level
-- Learn a policy network from game data (move prediction)
-- Use this network as starting point for self-play |
-- Let computer play against other versions of itself |
-- Massive improvement already |
-- Use this better network to derive a value network (position evaluation) |
-- Do tree search. Choose move by considering: |
-  - value function |
-  - sampling rollouts using our policy network |
 
 +++
 
@@ -175,8 +163,7 @@
 
 ## How? Part II
 - Use state-outcome pairs $(s,z)$ from self-play to learn a value network $v_{\theta}(s)$ |
-- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$
-- i.e. updates given by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
+- Do this by regression, minimizing MSE between $v_{\theta}(s)$ and $z$, update by $\Delta \theta \propto \frac{\partial v_{\theta}(s)}{\partial \theta} (z - v(s))$ |
 - Combine value network $v_{\theta}(s)$ and rollouts $z_L$ from fast policy as follows: |
 - $V(s_L) = (1 - \lambda) v(s) + \lambda z_L$ |
 
