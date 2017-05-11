@@ -12,7 +12,24 @@
 
 +++
 
-## Introduction to Go in one move
+## Introduction to Go in two moves
+
+## Ear-reddening move
+<figure>
+<div style="width: 50%; display: inline-block">
+    <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/ear_reddening.png">
+</div>
+</figure>
+
+
++++
+
+- Among the most famous moves in history
+- Move "feels right" |
+- There are many local patterns to respect |
+- Complex interaction with surrounding stones |
+- Value depends on exact board position |
+- Hard to evaluate the position itself |
 
 <div style="width: 50%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/redmond_irritating.png">
@@ -26,6 +43,7 @@
 </figure>
 
 +++
+
 ## What's so special?
 
 ##### "It’s not a human move. I’ve never seen a human play this move.”
@@ -149,6 +167,18 @@
 
 +++
 
+## How? High level
+- Learn a policy network from game data (move prediction)
+- Use this network as starting point for self-play |
+- Let computer play against other versions of itself |
+- Massive improvement already |
+- Use this better network to derive a value network (position evaluation) |
+- Do tree search. Choose move by considering: |
+  - value function |
+  - sampling rollouts using our policy network |
+
++++
+
 ## How? Part I
 - Policy network $p_{\sigma}$ from game data
 - Initialize RL policy $p_{\rho}$ |
@@ -172,8 +202,6 @@
 - All three pillars have been there before
 - Incredible engineering achievement |
 - Read the paper, build your own bots! |
-- At collectAI we are using DL and RL for communication: |
-- when and how to contact a person |
 
 ---
 
