@@ -33,6 +33,8 @@
 - Value depends on exact board position |
 - Hard to evaluate the position itself |
 
++++
+
 <div style="width: 50%; display: inline-block">
     <img src="https://raw.githubusercontent.com/maxpumperla/betago/hamburg-ai/redmond_irritating.png">
 </div>
