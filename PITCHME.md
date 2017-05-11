@@ -14,6 +14,8 @@
 
 ## Introduction to Go in two moves
 
++++
+
 ## Ear-reddening move
 <figure>
 <div style="width: 50%; display: inline-block">
