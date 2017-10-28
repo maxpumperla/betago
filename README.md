@@ -50,7 +50,7 @@ You can modify and extend any of the steps outlined above and help decrease the 
 
 ## How can I run my own bot?
 Training and serving a bot can be done in just a few steps. The following example uses a convolutional neural network implemented in keras, but you are free to choose other libraries as well. The code for this example can be found in the examples folder.
-We start by defining a Go data processor, which downloads an preprocesses Go games. A regular Go board consists of 19 times 19 fields. The ```SevenPlaneProcessor```, inspired by [1] loads seven planes of ```19*19``` data points, three layers representing moves of varying liberties for each color and one capturing for ko.
+We start by defining a Go data processor, which downloads and preprocesses Go games. A regular Go board consists of 19 times 19 fields. The ```SevenPlaneProcessor```, inspired by [1] loads seven planes of ```19*19``` data points, three layers representing moves of varying liberties for each color and one capturing for ko.
 ```{python}
 from betago.processor import SevenPlaneProcessor
 processor = SevenPlaneProcessor()
