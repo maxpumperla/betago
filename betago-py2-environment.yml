@@ -1,0 +1,48 @@
+name: betagopy2
+channels:
+- conda-forge
+- defaults
+dependencies:
+- backports=1.0=py27_1
+- backports.weakref=1.0rc1=py27_1
+- bleach=1.5.0=py27_0
+- ca-certificates=2017.7.27.1=0
+- certifi=2017.7.27.1=py27_0
+- funcsigs=1.0.2=py_2
+- html5lib=0.9999999=py27_0
+- markdown=2.6.9=py27_0
+- mock=2.0.0=py27_0
+- ncurses=5.9=10
+- openssl=1.0.2l=0
+- pbr=3.1.1=py27_0
+- pip=9.0.1=py27_0
+- protobuf=3.4.0=py27_0
+- python=2.7.14=0
+- readline=6.2=0
+- setuptools=36.6.0=py27_1
+- six=1.11.0=py27_1
+- sqlite=3.13.0=1
+- tensorflow=1.3.0=py27_0
+- tk=8.5.19=2
+- webencodings=0.5=py27_0
+- werkzeug=0.12.2=py_1
+- wheel=0.30.0=py_1
+- zlib=1.2.8=3
+- mkl=2017.0.3=0
+- numpy=1.13.1=py27_0
+- pip:
+  - betago==0.2
+  - click==6.7
+  - flask==0.12.2
+  - flask-cors==3.0.3
+  - future==0.16.0
+  - gomill==0.8
+  - h5py==2.7.1
+  - itsdangerous==0.24
+  - jinja2==2.9.6
+  - keras==2.0.8
+  - markupsafe==1.0
+  - pyyaml==3.12
+  - scipy==1.0.0
+prefix: /home/arushi/anaconda3/envs/betagopy2
+
