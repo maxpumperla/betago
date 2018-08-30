@@ -7,6 +7,13 @@ import tempfile
 from contextlib import contextmanager
 from operator import attrgetter
 
+try:
+    
+    cmp = cmp       # Python 2
+except NameError:
+    def cmp(a, b):  # Python 3
+        return (a > b) - (a < b)
+
 __all__ = [
     'SGF',
     'find_sgfs',
