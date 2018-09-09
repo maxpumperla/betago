@@ -350,13 +350,17 @@ class GoDataProcessor(GoBaseProcessor):
         print(file_names)
         for file_name in file_names:
             file_prefix = file_name.replace('.tar.gz', '')
-            base = self.data_dir + '/' + file_prefix + '_features_*.npy'
-            print(base)
-            for feature_file in glob.glob(base):
+            feature_base = self.data_dir + '/' + file_prefix + '_features_*.npy'
+            print(feature_base)
+            for feature_file in glob.glob(feature_base):
                 print(feature_file)
                 X = np.load(feature_file)
-                y = np.load(feature_file)
                 feature_list.append(X)
+            label_base = self.data_dir + '/' + file_prefix + '_labels_*.npy'
+            print(label_base)
+            for label_file in glob.glob(label_base):
+                print(label_file)
+                y = np.load(label_file)
                 label_list.append(y)
         print('>>> Done')
 
