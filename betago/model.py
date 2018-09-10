@@ -6,7 +6,7 @@ from itertools import chain, product
 from multiprocessing import Process
 
 from flask import Flask, request, jsonify
-from flask.ext.cors import CORS
+from flask_cors import CORS
 import numpy as np
 from . import scoring
 from .dataloader.goboard import GoBoard
@@ -20,8 +20,9 @@ class HTTPFrontend(object):
     go moves.
     '''
 
-    def __init__(self, bot, port=8080):
+    def __init__(self, bot, graph, port=8080):
         self.bot = bot
+        self.graph = graph
         self.port = port
 
     def start_server(self):
@@ -83,19 +84,20 @@ class HTTPFrontend(object):
 
             Parses the move and hands the work off to the bot.
             '''
-            content = request.json
-            col = content['i']
-            row = content['j']
-            print('Received move:')
-            print((col, row))
-            self.bot.apply_move('b', (row, col))
+            with self.graph.as_default():
+                content = request.json
+                col = content['i']
+                row = content['j']
+                print('Received move:')
+                print((col, row))
+                self.bot.apply_move('b', (row, col))
 
-            bot_row, bot_col = self.bot.select_move('w')
-            print('Prediction:')
-            print((bot_col, bot_row))
-            result = {'i': bot_col, 'j': bot_row}
-            json_result = jsonify(**result)
-            return json_result
+                bot_row, bot_col = self.bot.select_move('w')
+                print('Prediction:')
+                print((bot_col, bot_row))
+                result = {'i': bot_col, 'j': bot_row}
+                json_result = jsonify(**result)
+                return json_result
 
         self.app.run(host='0.0.0.0', port=self.port, debug=True, use_reloader=False)
 

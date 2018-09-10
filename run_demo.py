@@ -5,6 +5,7 @@ import yaml
 import os
 import webbrowser
 
+import tensorflow as tf
 from keras.models import model_from_yaml
 from betago.model import HTTPFrontend, KerasBot
 from betago.processor import SevenPlaneProcessor
@@ -22,6 +23,7 @@ with open(model_file, 'r') as f:
     # Note that in Keras 1.0 we have to recompile the model explicitly
     model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
     model.load_weights(weight_file)
+    graph = tf.get_default_graph()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--host', default='localhost', help='host to listen to')
@@ -32,5 +34,5 @@ args = parser.parse_args()
 # Open web frontend and serve model
 webbrowser.open('http://{}:{}/'.format(args.host, args.port), new=2)
 go_model = KerasBot(model=model, processor=processor)
-go_server = HTTPFrontend(bot=go_model, port=args.port)
+go_server = HTTPFrontend(bot=go_model, graph=graph, port=args.port)
 go_server.run()
