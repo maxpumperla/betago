@@ -37,6 +37,6 @@
     "grunt-shell": "^1.1.1"
   },
   "dependencies": {
-    "superagent": "^1.1.0"
+    "superagent": "^5.1.0"
   }
 }
