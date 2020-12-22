@@ -1,3 +1,6 @@
+This project is now archived. It's been fun working on it, but it's time for me to move on. Thank you for all the support and feedback over the last couple of years. If someone is interested in taking ownership, let's discuss. :v:
+---
+
 # BetaGo [![Build Status](https://travis-ci.org/maxpumperla/betago.svg?branch=master)](https://travis-ci.org/maxpumperla/betago) [![PyPI version](https://badge.fury.io/py/betago.svg)](https://badge.fury.io/py/betago)
 *So, you don't work at Google Deep Mind and you don't have access to Nature. You've come to the right place. BetaGo will stay beta! We are the 99%! We are Lee Sedol!*
 
